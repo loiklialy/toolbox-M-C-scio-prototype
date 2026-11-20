@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Boîte à outils Mentorat & Coaching — Prototype collaboratif</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Layout: top bar + role switcher, sub-tabs per role, cards; comments anchored per row */
+  --bg:#f4f5f2; --surface:#ffffff; --ink:#1f2823; --muted:#5c6a61; --line:#dde2db;
+  --accent:#1e6f4f; --accent-soft:#e3efe8; --warn:#b26a00; --warn-soft:#fdf2e0;
+  --crit:#b3372f; --crit-soft:#fbe8e6; --ok:#1e6f4f; --ok-soft:#e3efe8;
+  --font-display:"Archivo","Segoe UI",system-ui,sans-serif;
+  --font-body:"Public Sans","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#161a17; --surface:#1f2521; --ink:#e8ece8; --muted:#9faba2; --line:#323a34;
+    --accent:#52b388; --accent-soft:#24352c; --warn:#e0a24a; --warn-soft:#38301f;
+    --crit:#e07a70; --crit-soft:#3a2523; --ok:#52b388; --ok-soft:#24352c;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#161a17; --surface:#1f2521; --ink:#e8ece8; --muted:#9faba2; --line:#323a34;
+  --accent:#52b388; --accent-soft:#24352c; --warn:#e0a24a; --warn-soft:#38301f;
+  --crit:#e07a70; --crit-soft:#3a2523; --ok:#52b388; --ok-soft:#24352c;
+  color-scheme: dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.5}
+.wrap{max-width:1120px;margin:0 auto;padding:0 16px 64px}
+header.top{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--line);margin-bottom:20px}
+.top-inner{max-width:1120px;margin:0 auto;padding:14px 16px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+.brand{font-family:var(--font-display);font-weight:700;font-size:17px;letter-spacing:-.01em}
+.brand small{display:block;font-family:var(--font-body);font-weight:400;font-size:12px;color:var(--muted)}
+.roles{display:flex;gap:6px;flex-wrap:wrap}
+.roles button{font-family:var(--font-body);font-weight:600;font-size:13px;padding:8px 14px;border-radius:99px;border:1px solid var(--line);background:var(--surface);color:var(--muted);cursor:pointer}
+.roles button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.roles button.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.demo-note{background:var(--warn-soft);color:var(--warn);border:1px solid var(--warn);border-radius:8px;padding:8px 14px;font-size:13px;margin-bottom:20px}
+h1{font-family:var(--font-display);font-size:23px;font-weight:700;letter-spacing:-.01em;margin:0 0 4px;text-wrap:balance}
+h2{font-family:var(--font-display);font-size:16.5px;font-weight:600;margin:0 0 10px}
+h3{font-family:var(--font-display);font-size:14px;font-weight:600;margin:18px 0 8px}
+.sub{color:var(--muted);font-size:14px;margin:0 0 16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:20px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px}
+.tile .n{font-family:var(--font-display);font-size:24px;font-weight:700;font-variant-numeric:tabular-nums}
+.tile .l{font-size:12.5px;color:var(--muted);margin-top:2px}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:600;padding:7px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+.num{font-variant-numeric:tabular-nums;text-align:right}
+.scroll{overflow-x:auto}
+.chip{display:inline-block;font-size:11.5px;font-weight:600;padding:2px 9px;border-radius:99px;white-space:nowrap}
+.chip.ok{background:var(--ok-soft);color:var(--ok)}
+.chip.warn{background:var(--warn-soft);color:var(--warn)}
+.chip.crit{background:var(--crit-soft);color:var(--crit)}
+.chip.neutral{background:var(--accent-soft);color:var(--accent)}
+.chip.grey{background:var(--line);color:var(--muted)}
+.bar{height:8px;background:var(--line);border-radius:99px;overflow:hidden;min-width:70px}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:99px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:720px){.grid2{grid-template-columns:1fr}}
+label{font-size:12.5px;font-weight:600;display:block;margin-bottom:3px}
+input,select,textarea{font-family:var(--font-body);font-size:13.5px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:6px 8px;width:100%}
+input[type="number"]{width:68px;text-align:right}
+input.mini{width:54px;padding:4px 5px;text-align:right}
+input.minitxt{width:56px;padding:4px 5px}
+input[type="checkbox"]{width:auto;accent-color:var(--accent)}
+textarea{resize:vertical;min-height:52px}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.btn{font-family:var(--font-body);font-weight:600;font-size:13px;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:8px 14px;cursor:pointer}
+.btn.secondary{background:var(--surface);color:var(--accent);border:1px solid var(--accent)}
+.btn.sm{padding:3px 8px;font-size:12px;border-radius:6px}
+.btn.ghost{background:transparent;color:var(--muted);border:1px solid var(--line)}
+.btn.sm.ok{background:var(--ok)}
+.btn.sm.rev{background:var(--surface);color:var(--crit);border:1px solid var(--crit)}
+.locked{color:var(--muted);font-size:12px}
+.q{margin-bottom:12px}
+.q p{margin:0 0 5px;font-weight:500;font-size:13.5px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
+.field{flex:1;min-width:120px}
+.score-note{font-size:12.5px;color:var(--muted);margin:0 0 10px}
+.select-line{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.select-line select{width:auto;min-width:220px}
+.legend{display:flex;gap:16px;font-size:12.5px;color:var(--muted);flex-wrap:wrap;margin-top:8px}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px}
+.legend .l-ent::before{background:var(--accent)}
+.legend .l-sso::before{background:var(--warn)}
+footer{color:var(--muted);font-size:12.5px;margin-top:32px;border-top:1px solid var(--line);padding-top:16px}
+.view{display:none}
+.view.visible{display:block}
+.subtabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:18px;border-bottom:1px solid var(--line);padding-bottom:10px}
+.subtabs button{font-family:var(--font-body);font-size:12.5px;font-weight:600;padding:7px 11px;border-radius:8px;border:none;background:transparent;color:var(--muted);cursor:pointer}
+.subtabs button.active{background:var(--accent-soft);color:var(--accent)}
+.cbtn{font-size:12px;border:1px solid var(--line);background:var(--bg);border-radius:99px;padding:2px 8px;cursor:pointer;color:var(--muted);white-space:nowrap}
+.cbtn.has{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.cbtn.open{outline:2px solid var(--accent)}
+.thread{margin-top:14px;border:1px solid var(--accent);border-radius:10px;padding:14px;background:var(--bg)}
+.thread h3{margin:0 0 8px}
+.comment{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin-bottom:8px;font-size:13px}
+.comment .meta{font-size:11.5px;color:var(--muted);margin-bottom:2px}
+.comment.coach{border-left:3px solid var(--warn)}
+.comment.ent{border-left:3px solid var(--accent)}
+details{border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin-bottom:10px;background:var(--bg)}
+details summary{font-weight:600;font-size:14px;cursor:pointer;display:flex;justify-content:space-between;gap:10px;align-items:center}
+details[open]{background:var(--surface)}
+.check-item{display:flex;align-items:center;gap:6px;font-size:12.5px;white-space:nowrap;margin:2px 0}
+ul{padding-left:20px;margin:8px 0}
+.alert-list li{margin-bottom:6px}
+.auto-tag{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.vcell{white-space:nowrap}
+.star{color:var(--warn);font-size:14px}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-inner">
+    <div class="brand">Boîte à outils Mentorat &amp; Coaching<small>Prototype collaboratif — SCIO Network</small></div>
+    <nav class="roles" aria-label="Changer de rôle">
+      <button id="rb-ent" class="active" onclick="setRole('ent')">Entreprise</button>
+      <button id="rb-coach" onclick="setRole('coach')">SAEI</button>
+      <button id="rb-saei" onclick="setRole('saei')">Partenaire financier</button>
+    </nav>
+  </div>
+</header>
+<div class="wrap">
+<div class="demo-note">Maquette de démonstration : données fictives, modifications conservées le temps de la session. Les trois boutons simulent les trois accès — en production chaque rôle se connecte avec son compte et ne voit que son périmètre. Cliquez sur les pastilles 💬 pour ouvrir le fil de commentaires attaché à une ligne précise.</div>
+
+<section id="view-ent" class="view visible">
+  <h1>Espace entreprise — AgriNova</h1>
+  <p class="sub">Vous ne voyez que vos propres données. Les éléments construits par votre coach sont en lecture seule : réagissez via les commentaires ancrés sur chaque ligne.</p>
+  <nav class="subtabs" id="ent-subtabs" aria-label="Sections entreprise"></nav>
+  <div id="ent-content"></div>
+</section>
+
+<section id="view-coach" class="view">
+  <h1>Espace SAEI — Mariam K. (chargée d'accompagnement)</h1>
+  <p class="sub">Vous voyez uniquement les entreprises qui vous sont assignées. Chaque ligne du budget, des indicateurs et du rapport financier se valide indépendamment.</p>
+  <div class="select-line">
+    <label for="coach-select" style="margin:0">Entreprise :</label>
+    <select id="coach-select" onchange="renderRole()"></select>
+  </div>
+  <nav class="subtabs" id="coach-subtabs" aria-label="Sections coach"></nav>
+  <div id="coach-content"></div>
+</section>
+
+<section id="view-saei" class="view">
+  <h1>Partenaire financier — Cohorte 2026</h1>
+  <p class="sub">Vue en lecture seule, recentrée sur les résultats du programme : impacts, financements, atteinte des indicateurs et classement final.</p>
+  <div id="saei-content"></div>
+</section>
+
+<footer>Prototype fidèle à la structure des matrices « Diagnostic 360° » (11 domaines, double scoring, catégories Accelerator / Cruiser / Drifter) et « Mentoring &amp; Coaching », avec une évolution méthodologique : les jalons sont remplacés par des indicateurs SMART attachés aux activités clés du plan de croissance. Entreprises et personnes fictives. En production : un compte par utilisateur, historique des modifications, export Excel à chaque niveau.</footer>
+</div>
+
+<script>
+// ============ RÉFÉRENTIELS (issus des classeurs Excel) ============
+const DOMAINS = ["Problème et Solution","Produit et Technologie","Modèle Économique","Marché","Clients","Concurrence","Équipe","Potentiel de croissance","Finances","Risques","ESG et Impact"];
+const QUESTIONS = {
+"Problème et Solution":[
+"1. Quelle est la problématique que votre startup cherche à résoudre ?",
+"2. Comment les gens résolvent-ils actuellement ce problème ? Pourquoi ces solutions actuelles échouent-elles ou sont-elles insuffisantes ?",
+"3. Quelles preuves avez-vous que ce problème est réel et prioritaire pour vos cibles (entretiens, enquêtes, observations terrain) ?",
+"4. Quelle est la proposition de valeur unique de votre produit/service ?",
+"5. Quels sont les obstacles ou défis potentiels à l'adoption de votre produit/service ?"],
+"Produit et Technologie":[
+"1. Quel problème votre produit ou technologie résout-il pour les clients ?",
+"2. Comment votre produit ou technologie se compare-t-il à ceux des concurrents en termes de fonctionnalités, de performances et de prix ?",
+"3. À quelle phase de développement votre produit se trouve-t-il actuellement : prototypage, prêt au lancement, déjà lancé ?",
+"4. Si votre produit a été lancé, quels retours concrets avez-vous recueillis lors des tests/pilotes et qu'en avez-vous fait ?",
+"5. Quel est votre plan de développement produit pour l'avenir ?"],
+"Modèle Économique":[
+"1. Comment prévoyez-vous de générer des revenus ?",
+"2. Qui sont vos principaux partenaires, fournisseurs et prestataires dans votre chaîne de valeur ?",
+"3. Quelle part de vos revenus est récurrente (abonnements, maintenance) vs ponctuelle ?",
+"4. Quelle est votre structure de prix et quelle marge dégagez-vous par produit/service ?"],
+"Marché":[
+"1. Quel est votre marché cible ?",
+"2. Par quel segment de votre marché cible commencez-vous et pourquoi ?",
+"3. Quelle est la taille estimée de votre marché (globale, adressable, atteignable) et sur quelles sources ?",
+"4. Le marché est-il en croissance, stable ou en déclin ? Quelles tendances le portent ?"],
+"Clients":[
+"1. Comment atteignez-vous vos clients cibles ? Quels sont les canaux marketing les plus efficaces ?",
+"2. Avez-vous identifié un profil client idéal ? Qui décide, qui paie et qui utilise ? Quelle est la durée du cycle de vente ?",
+"3. Quelles sont les objections les plus courantes des clients ?",
+"4. Combien de clients payants avez-vous aujourd'hui ? Combien de prospects en discussion ?",
+"5. Vos clients reviennent-ils ou vous recommandent-ils ? Comment le mesurez-vous ?"],
+"Concurrence":[
+"1. Qui sont vos principaux concurrents ? Pouvez-vous les nommer et décrire leurs produits/services ?",
+"2. Qu'est-ce qui vous différencie durablement et pourquoi ces avantages sont-ils difficiles à répliquer ?",
+"3. Comment suivez-vous l'évolution de vos concurrents ?"],
+"Équipe":[
+"1. Qui sont les membres de votre équipe fondatrice ? Parcours et domaines d'expertise ?",
+"2. Les fondateurs sont-ils à temps plein ? Quelle est la répartition du capital ?",
+"3. Que se passe-t-il si le fondateur principal est indisponible 3 mois ?",
+"4. Quelles compétences clés manquent à l'équipe et comment comptez-vous les combler ?",
+"5. Qu'est-ce qui vous a motivé à créer cette entreprise ?",
+"6. Avez-vous des mentors, advisors ou un comité qui challengent vos décisions ?"],
+"Potentiel de croissance":[
+"1. Quelle est votre projection de croissance pour les 3 à 5 prochaines années ?",
+"2. Sur quelles hypothèses reposent vos projections (capacité de production, financement, recrutements) ?",
+"3. Quel est le principal goulot d'étranglement de votre croissance aujourd'hui ?",
+"4. De quoi avez-vous besoin (fonds, partenaires, talents) pour tenir ces projections ?"],
+"Finances":[
+"1. Quel est le chiffre d'affaires actuel de l'entreprise ?",
+"2. L'entreprise est-elle rentable ? Si non, quel est le délai prévu pour atteindre la rentabilité ?",
+"3. Quelle est votre trésorerie actuelle et combien de mois d'activité couvre-t-elle ?",
+"4. Quelles sont les dépenses d'exploitation actuelles et leur répartition ?",
+"5. Tenez-vous une comptabilité formelle ? Les chiffres sont-ils vérifiables ?",
+"6. Quelles sont les sources de financement et combien de fonds ont été levés à ce jour ?",
+"7. Avez-vous un pitch deck ? Si oui, veuillez le joindre."],
+"Risques":[
+"1. Quels sont les plus grands risques pour la réussite de l'entreprise et comment les gérez-vous ?",
+"2. Avez-vous réalisé une analyse SWOT approfondie pour identifier les risques et opportunités ?"],
+"ESG et Impact":[
+"1. Quelle est votre approche pour gérer et gouverner les enjeux environnementaux et sociaux liés à votre activité ?",
+"2. Quels indicateurs de performance environnementale et sociale mettez-vous en place ?",
+"3. Comment l'entreprise garantit-elle des conditions de travail sûres et équitables ?",
+"4. Quelles mesures pour promouvoir la diversité et l'inclusion, notamment le genre ?",
+"5. Quels mécanismes pour signaler et traiter les incidents ou cas de harcèlement ?"]
+};
+const STADES=["Idéation","Incubation","Accélération"];
+// Questionnaires par stade : copies modifiables du référentiel (l'onglet « Questionnaire 360° » de la vue SAEI les édite)
+const QUESTIONNAIRES={};
+STADES.forEach(st=>{ QUESTIONNAIRES[st]=JSON.parse(JSON.stringify(QUESTIONS)); });
+// Exemples d'adaptation par stade (modifiables)
+QUESTIONNAIRES["Idéation"]["Clients"][3]="4. Avez-vous déjà des utilisateurs tests, pré-inscriptions ou lettres d'intention ?";
+QUESTIONNAIRES["Idéation"]["Finances"]=QUESTIONNAIRES["Idéation"]["Finances"].slice(0,4);
+QUESTIONNAIRES["Accélération"]["Finances"].push("8. Quel est votre taux de croissance mensuel du chiffre d'affaires sur les 6 derniers mois ?");
+function qFor(c){ return QUESTIONNAIRES[c.stade]||QUESTIONNAIRES["Incubation"]; }
+
+const BESOINS = {
+"Problème et Solution":["Proposition de valeur peu claire ou non validée","Problématique mal définie ou trop large","Absence de preuves de traction ou de validation","Obstacles à l'adoption non identifiés"],
+"Produit et Technologie":["Prototype non testé en conditions réelles","Manque de différenciation technique","Absence de feuille de route produit","Documentation/processus de développement faibles"],
+"Modèle Économique":["Modèle de revenus non défini ou non validé","Dépendance à un seul canal de revenus","Coûts de production/distribution mal connus","Chaîne de valeur et partenaires clés non clarifiés"],
+"Concurrence":["Absence d'analyse concurrentielle structurée","Positionnement non différencié","Faible compréhension des forces/faiblesses des concurrents","Pas de veille sur tendances/nouveaux entrants"],
+"Marché":["Marché cible trop large ou mal défini","Taille du marché/potentiel non documenté","Absence de stratégie de pénétration","Données de marché insuffisantes"],
+"Équipe":["Compétences clés manquantes","Rôles et responsabilités flous","Faible expérience sectorielle/managériale","Disponibilité ou engagement insuffisant"],
+"Clients":["Segmentation client absente/incomplète","Difficulté à atteindre/convertir","Manque de feedback structuré","Faible rétention ou engagement"],
+"Potentiel de croissance":["Absence de stratégie de croissance","Objectifs non chiffrés","Pas de plan d'expansion géographique/sectorielle","Dépendance à un seul segment/marché"],
+"Finances":["Suivi financier (budget, trésorerie, marges) absent","Structure de coûts mal maîtrisée","Insuffisance de fonds pour la stratégie","Absence de prévisions financières à moyen terme"],
+"Risques":["Pas d'analyse SWOT/plan de mitigation","Dépendance à un partenaire/fournisseur clé","Risques réglementaires non identifiés","Absence de plan de continuité/crise"]};
+const PLAN_CATS = Object.keys(BESOINS);
+const COMM_TYPES = ["Échange d'e-mails","Communication WhatsApp","Appel téléphonique","Appel vidéo"];
+const ENGAGEMENTS = ["Engagé","Réactif","Pas réactif (pas de réponse depuis plus d'une semaine)","Pas engagé (aucun progrès sur le plan d'action)"];
+const DEVISES = ["EUR","USD","CFA","GBP","CHF","MAD","DZD","TND","NGN","GHS","KES"];
+const DEPENSE_CATS = ["Bootcamp","CAPEX","OPEX","Fonds de roulement"];
+const SOURCES = ["Premier Versement","Deuxième Versement"];
+const MOIS = ["Départ","Jan","Fév","Mar","Avr","Mai","Jun","Jul","Aoû","Sep"];
+const VSTATES = {"À valider":"warn","Validé":"ok","À revoir":"crit"};
+
+// ============ DONNÉES FICTIVES ============
+// plan : une ligne par activité clé, rattachée à un besoin identifié
+// inds : indicateurs SMART rattachés aux activités clés (phare = remonte au niveau programme)
+function mkScores(ent, sso){ const o={}; DOMAINS.forEach((d,i)=>{ o[d]={ent:ent[i], sso:sso[i]}; }); return o; }
+function m9(obj){ const a=Array(9).fill(0); Object.entries(obj||{}).forEach(([k,v])=>a[+k]=v); return a; }
+
+const companies = [
+ { id:"agrinova", name:"AgriNova", secteur:"Agritech", coach:"Mariam K.", heuresPrevu:24, stade:"Incubation", impact:{emplois:4,emploisFemmes:2,ca:18000,beneficiaires:320},
+   infos:{nom:"Diallo", prenom:"Awa", pays:"Côte d'Ivoire", email:"awa@agrinova.example", anglais:"Fonctionnel Limité", francais:"Professionnel Complet"},
+   scores: mkScores([7,6,5,6,5,4,7,6,4,5,6],[6,5,4,5,4,4,6,5,3,4,5]),
+   reponses: {"Problème et Solution":["L'accès des petits producteurs à des intrants de qualité à prix maîtrisé.","Achats au détail à prix fort auprès d'intermédiaires ; qualité non garantie.","40 entretiens producteurs menés dans 3 régions ; 85 % citent le prix des intrants comme frein n°1.","Groupement de commandes digitalisé + contrôle qualité certifié.","Faible connectivité en zone rurale, habitudes d'achat au comptant."]},
+   plan:[
+     {cat:"Problème et Solution", besoin:"Proposition de valeur peu claire ou non validée", act:"Entretiens clients & reformulation de l'offre", duree:4, livrable:"Value proposition canvas validé", lim:"2026-12-15", done:true},
+     {cat:"Problème et Solution", besoin:"Proposition de valeur peu claire ou non validée", act:"Test du pitch sur 10 prospects", duree:2, livrable:"Rapport de test du pitch", lim:"2027-01-10", done:false},
+     {cat:"Problème et Solution", besoin:"Obstacles à l'adoption non identifiés", act:"Unités de démonstration en région", duree:6, livrable:"4 unités opérationnelles avec animateur formé", lim:"2027-03-01", done:false},
+     {cat:"Clients", besoin:"Difficulté à atteindre/convertir", act:"Force de vente terrain", duree:8, livrable:"Équipe formée + plan de commissionnement", lim:"2027-02-15", done:false},
+     {cat:"Clients", besoin:"Difficulté à atteindre/convertir", act:"Campagne radio locale", duree:3, livrable:"Plan média exécuté", lim:"2027-04-01", done:false},
+     {cat:"Finances", besoin:"Suivi financier (budget, trésorerie, marges) absent", act:"Tableau de bord financier mensuel", duree:2, livrable:"Tableau de bord + formation", lim:"2026-12-01", done:false}],
+   inds:[
+     {ind:"Clients actifs (≥ 2 commandes)", act:"Force de vente terrain", cible:"50", ech:"Juin 2027", phare:true, type:"Performance", vals:["12","18","25","32","","","","","",""], v:"Validé"},
+     {ind:"Revenu mensuel récurrent (€)", act:"Force de vente terrain", cible:"2 000", ech:"Sept. 2027", phare:true, type:"Performance", vals:["650","","1 150","","","","","","",""], v:"À valider"},
+     {ind:"Taux de rétention à 3 mois (%)", act:"Entretiens clients & reformulation de l'offre", cible:"70", ech:"Juin 2027", phare:false, type:"Performance", vals:["45","","58","","","","","","",""], v:"À valider"},
+     {ind:"Unités de démonstration opérationnelles", act:"Unités de démonstration en région", cible:"4", ech:"Mars 2027", phare:true, type:"Performance", vals:["0","1","2","","","","","","",""], v:"À valider"},
+     {ind:"Producteurs approvisionnés en intrants certifiés", act:"Unités de démonstration en région", cible:"400", ech:"Sept. 2027", phare:false, type:"Impact", vals:["90","150","220","320","","","","","",""], v:"À valider"}],
+   budget:[
+     {act:"BOOTCAMP", desc:"Transport, hébergement pour le bootcamp", cat:"Bootcamp", mois:m9({0:800}), v:"Validé"},
+     {act:"Unités de démonstration en région", desc:"Motoculteurs de démonstration (x2)", cat:"CAPEX", mois:m9({1:2000,2:2000}), v:"Validé"},
+     {act:"Unités de démonstration en région", desc:"Stock initial d'intrants certifiés", cat:"Fonds de roulement", mois:m9({1:1500,3:1000}), v:"À valider"},
+     {act:"Force de vente terrain", desc:"Agent commercial terrain (6 mois)", cat:"OPEX", mois:m9({1:850,2:850,3:850,4:850,5:850,6:850}), v:"À valider"},
+     {act:"Campagne radio locale", desc:"Campagne radio locale + flyers", cat:"OPEX", mois:m9({3:900,4:600}), v:"À revoir"}],
+   rapport:[
+     {n:1, ref:"AGN-001", source:"Premier Versement", act:"Unités de démonstration en région", date:"2026-10-12", fourn:"AgroTech Distrib", desc:"Acompte motoculteur n°1", devise:"CFA", montant:1180000, taux:0.00152, cat:"CAPEX", compte:"CI93-…-4417", banque:"Banque Atlantique", pays:"Côte d'Ivoire", obs:"", v:"Validé"},
+     {n:2, ref:"AGN-002", source:"Premier Versement", act:"Unités de démonstration en région", date:"2026-10-25", fourn:"Semences du Nord", desc:"Lot d'intrants certifiés", devise:"CFA", montant:625000, taux:0.00152, cat:"Fonds de roulement", compte:"CI93-…-4417", banque:"Banque Atlantique", pays:"Côte d'Ivoire", obs:"Facture à joindre", v:"À revoir"},
+     {n:3, ref:"AGN-003", source:"Premier Versement", act:"Tableau de bord financier mensuel", date:"2026-11-05", fourn:"Cabinet Comptex", desc:"Honoraires comptables octobre", devise:"EUR", montant:350, taux:1, cat:"OPEX", compte:"CI93-…-4417", banque:"Banque Atlantique", pays:"Côte d'Ivoire", obs:"", v:"À valider"}],
+   sessions:[
+     {date:"2026-10-06", duree:2, type:"Appel vidéo", besoin:"Proposition de valeur peu claire ou non validée", act:"Cadrage du plan de croissance", next:"Préparer la liste des 15 clients à interviewer", eng:"Engagé"},
+     {date:"2026-10-27", duree:1.5, type:"Appel vidéo", besoin:"Proposition de valeur peu claire ou non validée", act:"Revue des 8 premiers entretiens clients", next:"Terminer les 7 entretiens restants avant le 15/11", eng:"Engagé"},
+     {date:"2026-11-12", duree:1, type:"Appel téléphonique", besoin:"Suivi financier (budget, trésorerie, marges) absent", act:"Préparation du comité de suivi, revue du gabarit de tableau de bord", next:"Compléter les données d'octobre dans le gabarit", eng:"Réactif"},
+     {date:"2026-11-18", duree:1.5, type:"Appel vidéo", besoin:"Difficulté à atteindre/convertir", act:"Entretiens de recrutement des agents commerciaux, revue du plan média", next:"Finaliser le plan de commissionnement", eng:"Engagé"}],
+   comments:{
+     "plan:0":[{role:"ent",auteur:"AgriNova",date:"2026-11-10",text:"Les ateliers de reformulation sont-ils prévus en présentiel ? Nos deux cofondateurs sont en déplacement la semaine 50."},
+               {role:"coach",auteur:"Mariam K.",date:"2026-11-11",text:"On peut les passer en visio, je mets à jour le planning."}],
+     "budget:4":[{role:"coach",auteur:"Mariam K.",date:"2026-11-14",text:"Le plan média me semble flou : quelle radio, quelle audience ? Merci de détailler avant validation."}],
+     "rapport:1":[{role:"coach",auteur:"Mariam K.",date:"2026-11-16",text:"Il manque la facture AGN-002 en pièce jointe, merci de la téléverser avant le comité."}]}},
+ { id:"kelio", name:"Kelio Santé", secteur:"e-santé", coach:"Mariam K.", heuresPrevu:24, stade:"Incubation", impact:{emplois:3,emploisFemmes:2,ca:25000,beneficiaires:2100},
+   infos:{nom:"Benali", prenom:"Yacine", pays:"Algérie", email:"y.benali@kelio.example", anglais:"Professionnel Complet", francais:"Professionnel Complet"},
+   scores: mkScores([8,7,6,7,6,5,8,7,6,6,7],[7,7,5,6,6,5,7,6,5,5,6]), reponses:{},
+   plan:[
+     {cat:"Marché", besoin:"Absence de stratégie de pénétration", act:"Cartographie des prescripteurs", duree:2, livrable:"Cartographie de 20 prescripteurs", lim:"2026-12-10", done:true},
+     {cat:"Marché", besoin:"Absence de stratégie de pénétration", act:"Conventions cliniques", duree:4, livrable:"2 conventions signées", lim:"2027-01-31", done:false},
+     {cat:"Risques", besoin:"Risques réglementaires non identifiés", act:"Audit de conformité données de santé", duree:3, livrable:"Rapport d'audit", lim:"2027-01-15", done:false},
+     {cat:"Produit et Technologie", besoin:"Absence de feuille de route produit", act:"Développement application mobile", duree:8, livrable:"V1 publiée", lim:"2027-03-30", done:false}],
+   inds:[
+     {ind:"Téléconsultations / mois", act:"Conventions cliniques", cible:"300", ech:"Juin 2027", phare:true, type:"Performance", vals:["80","120","160","210","","","","","",""], v:"Validé"},
+     {ind:"Cliniques partenaires signées", act:"Conventions cliniques", cible:"2", ech:"Févr. 2027", phare:true, type:"Performance", vals:["0","1","1","1","","","","","",""], v:"À valider"},
+     {ind:"Étapes de certification franchies (sur 4)", act:"Audit de conformité données de santé", cible:"4", ech:"Juin 2027", phare:false, type:"Performance", vals:["1","1","2","2","","","","","",""], v:"À valider"}],
+   budget:[
+     {act:"BOOTCAMP", desc:"Transport, hébergement bootcamp", cat:"Bootcamp", mois:m9({0:800}), v:"Validé"},
+     {act:"Audit de conformité données de santé", desc:"Audit de conformité données de santé", cat:"OPEX", mois:m9({1:1500,3:2000}), v:"Validé"},
+     {act:"Développement application mobile", desc:"Développeur mobile (4 mois)", cat:"OPEX", mois:m9({1:1500,2:1500,3:1500,4:1500}), v:"Validé"}],
+   rapport:[
+     {n:1, ref:"KEL-001", source:"Premier Versement", act:"Audit de conformité données de santé", date:"2026-10-20", fourn:"Cabinet LexSanté", desc:"Acompte audit conformité", devise:"DZD", montant:180000, taux:0.0067, cat:"OPEX", compte:"DZ58-…-2201", banque:"BNA", pays:"Algérie", obs:"", v:"Validé"},
+     {n:2, ref:"KEL-002", source:"Premier Versement", act:"Développement application mobile", date:"2026-11-08", fourn:"Dev Freelance B.T.", desc:"Sprint 1 application", devise:"EUR", montant:1500, taux:1, cat:"OPEX", compte:"DZ58-…-2201", banque:"BNA", pays:"Algérie", obs:"", v:"À valider"}],
+   sessions:[
+     {date:"2026-10-13", duree:2, type:"Appel vidéo", besoin:"Absence de stratégie de pénétration", act:"Diagnostic approfondi, cartographie des prescripteurs", next:"Lister 20 prescripteurs prioritaires", eng:"Engagé"},
+     {date:"2026-11-03", duree:1.5, type:"Appel vidéo", besoin:"Absence de stratégie de pénétration", act:"Revue du plan go-to-market", next:"Finaliser les conventions cliniques", eng:"Engagé"}],
+   comments:{}},
+ { id:"tiwa", name:"Tiwa Textile", secteur:"Artisanat / mode", coach:"Olivier D.", heuresPrevu:24, stade:"Idéation", impact:{emplois:2,emploisFemmes:2,ca:4000,beneficiaires:0},
+   infos:{nom:"Okafor", prenom:"Ada", pays:"Nigéria", email:"ada@tiwa.example", anglais:"Professionnel Complet", francais:"Elementaire"},
+   scores: mkScores([6,4,5,5,6,5,5,4,3,4,6],[5,3,4,4,5,4,4,4,2,3,5]), reponses:{},
+   plan:[
+     {cat:"Potentiel de croissance", besoin:"Objectifs non chiffrés", act:"Plan de production & équipement", duree:5, livrable:"Plan de production chiffré", lim:"2027-02-01", done:false},
+     {cat:"Finances", besoin:"Suivi financier (budget, trésorerie, marges) absent", act:"Comptabilité simplifiée", duree:2, livrable:"Livres comptables à jour", lim:"2026-11-15", done:false},
+     {cat:"Finances", besoin:"Structure de coûts mal maîtrisée", act:"Montée en capacité de production", duree:6, livrable:"Atelier équipé, coûts unitaires documentés", lim:"2027-04-01", done:false}],
+   inds:[
+     {ind:"Commandes en ligne / mois", act:"Montée en capacité de production", cible:"40", ech:"Juil. 2027", phare:true, type:"Performance", vals:["0","0","","","","","","","",""], v:"À valider"},
+     {ind:"Pièces produites / mois", act:"Montée en capacité de production", cible:"120", ech:"Avr. 2027", phare:false, type:"Performance", vals:["25","30","","","","","","","",""], v:"À valider"}],
+   budget:[
+     {act:"BOOTCAMP", desc:"Transport, hébergement bootcamp", cat:"Bootcamp", mois:m9({0:800}), v:"Validé"},
+     {act:"Montée en capacité de production", desc:"Machines à coudre industrielles (x3)", cat:"CAPEX", mois:m9({2:3600}), v:"À valider"},
+     {act:"Montée en capacité de production", desc:"Tissus et fournitures collection export", cat:"Fonds de roulement", mois:m9({2:1200,3:1000}), v:"À valider"}],
+   rapport:[
+     {n:1, ref:"TIW-001", source:"Premier Versement", act:"Montée en capacité de production", date:"2026-11-02", fourn:"TexImport SARL", desc:"Échantillons tissus", devise:"NGN", montant:480000, taux:0.00058, cat:"Fonds de roulement", compte:"NG21-…-8830", banque:"Zenith Bank", pays:"Nigéria", obs:"", v:"À valider"}],
+   sessions:[{date:"2026-10-20", duree:1, type:"Appel téléphonique", besoin:"Suivi financier (budget, trésorerie, marges) absent", act:"Point d'étape production, revue des coûts", next:"Transmettre les factures du trimestre", eng:"Pas réactif (pas de réponse depuis plus d'une semaine)"}],
+   comments:{}},
+ { id:"solarkit", name:"SolarKit", secteur:"Énergie", coach:"Olivier D.", heuresPrevu:24, stade:"Accélération", impact:{emplois:7,emploisFemmes:3,ca:86000,beneficiaires:3480},
+   infos:{nom:"Traoré", prenom:"Moussa", pays:"Sénégal", email:"m.traore@solarkit.example", anglais:"Fonctionnel Limité", francais:"Professionnel Complet"},
+   scores: mkScores([7,7,6,6,5,6,6,7,5,5,8],[7,6,6,5,5,5,6,6,5,4,7]), reponses:{},
+   plan:[
+     {cat:"Risques", besoin:"Dépendance à un partenaire/fournisseur clé", act:"Diversification fournisseurs", duree:3, livrable:"Contrats cadres signés", lim:"2026-12-20", done:true},
+     {cat:"Risques", besoin:"Dépendance à un partenaire/fournisseur clé", act:"Constitution du stock de kits", duree:4, livrable:"Stock de 100 kits", lim:"2027-01-15", done:true},
+     {cat:"Clients", besoin:"Difficulté à atteindre/convertir", act:"Force de vente terrain", duree:8, livrable:"Équipe commerciale formée", lim:"2027-01-30", done:true},
+     {cat:"Clients", besoin:"Difficulté à atteindre/convertir", act:"Supports de démonstration", duree:2, livrable:"Kit de vente", lim:"2026-11-30", done:true}],
+   inds:[
+     {ind:"Kits installés (cumul)", act:"Force de vente terrain", cible:"500", ech:"Juin 2027", phare:true, type:"Performance", vals:["120","180","240","300","348","","","","",""], v:"Validé"},
+     {ind:"Taux de panne sous 6 mois (%)", act:"Constitution du stock de kits", cible:"< 3", ech:"Juin 2027", phare:false, type:"Performance", vals:["2,8","2,5","2,3","2,1","","","","","",""], v:"Validé"},
+     {ind:"Ménages ayant accès à l'énergie (cumul)", act:"Force de vente terrain", cible:"5 000", ech:"Sept. 2027", phare:false, type:"Impact", vals:["1 200","1 800","2 400","3 000","3 480","","","","",""], v:"Validé"}],
+   budget:[
+     {act:"BOOTCAMP", desc:"Transport, hébergement bootcamp", cat:"Bootcamp", mois:m9({0:800}), v:"Validé"},
+     {act:"Constitution du stock de kits", desc:"Stock de kits solaires (100 unités)", cat:"Fonds de roulement", mois:m9({1:3500,3:3500}), v:"Validé"},
+     {act:"Force de vente terrain", desc:"Commerciaux terrain (x2, 6 mois)", cat:"OPEX", mois:m9({1:1070,2:1070,3:1070,4:1070,5:1070,6:1050}), v:"Validé"},
+     {act:"Supports de démonstration", desc:"Supports de vente et démonstration", cat:"OPEX", mois:m9({1:900}), v:"Validé"}],
+   rapport:[
+     {n:1, ref:"SOL-001", source:"Premier Versement", act:"Constitution du stock de kits", date:"2026-10-15", fourn:"SunParts Ltd", desc:"Acompte commande 100 kits", devise:"USD", montant:3000, taux:0.93, cat:"Fonds de roulement", compte:"SN12-…-5540", banque:"CBAO", pays:"Sénégal", obs:"", v:"Validé"},
+     {n:2, ref:"SOL-002", source:"Premier Versement", act:"Supports de démonstration", date:"2026-11-10", fourn:"Imprimerie Carrefour", desc:"Brochures de démonstration", devise:"CFA", montant:157000, taux:0.00152, cat:"OPEX", compte:"SN12-…-5540", banque:"CBAO", pays:"Sénégal", obs:"", v:"Validé"}],
+   sessions:[
+     {date:"2026-10-08", duree:2, type:"Appel vidéo", besoin:"Dépendance à un partenaire/fournisseur clé", act:"Revue fournisseurs, grille de qualification", next:"Obtenir 2 devis alternatifs", eng:"Engagé"},
+     {date:"2026-10-29", duree:1.5, type:"Appel vidéo", besoin:"Difficulté à atteindre/convertir", act:"Plan de recrutement commercial", next:"Publier les deux offres", eng:"Engagé"},
+     {date:"2026-11-17", duree:1, type:"Échange d'e-mails", besoin:"Dépendance à un partenaire/fournisseur clé", act:"Suivi des devis fournisseurs", next:"Comparer les devis reçus au comité", eng:"Réactif"}],
+   comments:{}}
+];
+const COACH_ID = "Mariam K.";
+
+// Scores PAR QUESTION (0-10) : init = diagnostic initial, fin = évaluation finale
+function clamp10(x){ return Math.max(0,Math.min(10,x)); }
+companies.forEach(c=>{
+  c.diag={init:{},fin:{}};
+  DOMAINS.forEach(d=>{
+    const b=c.scores[d];
+    c.diag.init[d]=qFor(c)[d].map((q,i)=>({ent:clamp10(b.ent+((i%3)-1)), sso:clamp10(b.sso+(((i+1)%3)-1))}));
+    c.diag.fin[d]=qFor(c)[d].map(()=>({ent:null,sso:null}));
+  });
+});
+// SolarKit : évaluation finale déjà réalisée (démonstration de la progression)
+(function(){ const sk=companies.find(c=>c.id==="solarkit");
+  DOMAINS.forEach(d=>{ sk.diag.fin[d]=sk.diag.init[d].map(q=>({ent:clamp10(q.ent+2), sso:clamp10(q.sso+2)})); });
+  ["kelio","agrinova"].forEach(id=>{ const c=companies.find(x=>x.id===id);
+    DOMAINS.forEach(d=>{ c.diag.fin[d]=c.diag.init[d].map(q=>({ent:clamp10(q.ent+1), sso:clamp10(q.sso+1)})); }); });
+})();
+
+// ============ CALCULS AUTOMATIQUES ============
+let role="ent", subtab={ent:"Diagnostic", coach:"Scores évaluateur"}, openThread=null;
+function avg(a){ return a.length?a.reduce((x,y)=>x+y,0)/a.length:0; }
+function domScore(c,d,who,phase){ phase=phase||"init"; const vals=c.diag[phase][d].map(q=>q[who]).filter(v=>v!==null&&v!==undefined); return vals.length?avg(vals):null; }
+function scoreFinal(c,w,phase){ const ds=DOMAINS.map(d=>domScore(c,d,w,phase)).filter(v=>v!==null); return ds.length?avg(ds):null; }
+function categorie(s){ return s>=8?"Accelerator":s>=5?"Cruiser":"Drifter"; }
+function catChip(s){ const k=s>=8?"ok":(s>=5?"neutral":"warn"); return `<span class="chip ${k}">${categorie(s)}</span>`; }
+function vChip(st){ return `<span class="chip ${VSTATES[st]||"grey"}">${st}</span>`; }
+function engChip(e){ const m={"Engagé":"ok","Réactif":"neutral"}; return `<span class="chip ${m[e]||"crit"}">${esc(e.split("(")[0].trim())}</span>`; }
+function eur(n){ return Math.round(n).toLocaleString("fr-FR")+" €"; }
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function heuresTot(c){ return c.sessions.reduce((a,s)=>a+s.duree,0); }
+function ligneTotal(b){ return b.mois.reduce((a,x)=>a+(+x||0),0); }
+function budgetTot(c){ return c.budget.reduce((a,b)=>a+ligneTotal(b),0); }
+function coutEUR(r){ return r.montant*r.taux; }
+function realiseTot(c){ return c.rapport.reduce((a,r)=>a+coutEUR(r),0); }
+function today(){ return new Date().toISOString().slice(0,10); }
+function C(){ return currentCompany(); }
+// Référentiel des activités clés = lignes du plan de croissance (+ BOOTCAMP, hors plan)
+function actOptions(c){ return ["BOOTCAMP",...c.plan.map(p=>p.act)]; }
+function actRow(c,act){ return c.plan.find(p=>p.act===act)||null; }
+function actBesoin(c,act){ const r=actRow(c,act); return r?r.besoin:"-"; }
+function besoinRows(c,besoin){ return c.plan.filter(p=>p.besoin===besoin); }
+// % d'exécution d'un besoin = part des activités clés cochées dans le Journal de mentorat (parts égales)
+function besoinPct(c,besoin){
+  const rows=besoinRows(c,besoin); if(!rows.length) return null;
+  return Math.round(100*rows.filter(p=>p.done).length/rows.length);
+}
+// Indicateurs SMART : dernière valeur saisie, et % d'atteinte vs cible quand les deux sont numériques
+function lastVal(k){ const v=k.vals.filter(x=>String(x).trim()!==""); return v.length?v[v.length-1]:""; }
+function numFR(x){ const n=parseFloat(String(x).replace(/\s/g,"").replace("%","").replace("€","").replace(",",".")); return isFinite(n)?n:null; }
+function indPct(k){
+  const v=numFR(lastVal(k)), cb=numFR(k.cible);
+  if(v===null) return null;
+  if(cb===null||cb<=0) return null; // cible non numérique (ex. « < 3 ») : affichage brut
+  return Math.min(100, Math.round(100*v/cb));
+}
+function indActs(c,act){ return c.inds.filter(k=>k.act===act); }
+function pctChip(p){
+  if(p===null) return `<span class="chip grey">—</span>`;
+  if(p>=100) return `<span class="chip ok">Atteint · 100 %</span>`;
+  if(p===0) return `<span class="chip grey">Non démarré</span>`;
+  return `<span class="chip neutral">En cours · ${p} %</span>`;
+}
+function pctBar(p){
+  if(p===null) return "";
+  return `<div class="bar" role="img" aria-label="${p}%"><i style="width:${Math.min(100,p)}%"></i></div>`;
+}
+function budgetParAct(c,act){ return c.budget.filter(b=>b.act===act).reduce((a,b)=>a+ligneTotal(b),0); }
+function depenseParAct(c,act){ return c.rapport.filter(r=>r.act===act).reduce((a,r)=>a+coutEUR(r),0); }
+function pendingRows(c){
+  return c.budget.filter(b=>b.v!=="Validé").length + c.inds.filter(k=>k.v!=="Validé").length
+       + c.rapport.filter(r=>r.v!=="Validé").length;
+}
+function pharePcts(c){ return c.inds.filter(k=>k.phare).map(indPct).filter(p=>p!==null); }
+function currentCompany(){
+  if(role==="ent") return companies[0];
+  const sel=document.getElementById("coach-select");
+  return companies.find(c=>c.id===sel.value)||companies.filter(c=>c.coach===COACH_ID)[0];
+}
+
+// ============ COMMENTAIRES ANCRÉS PAR LIGNE ============
+function cKey(mod,i){ return mod+":"+i; }
+function cBtn(mod,i){
+  const c=C(); const k=cKey(mod,i); const n=(c.comments[k]||[]).length;
+  const cls="cbtn"+(n?" has":"")+(openThread===k?" open":"");
+  return `<button class="${cls}" onclick="toggleThread('${k}')" aria-label="Commentaires de la ligne">💬${n?" "+n:""}</button>`;
+}
+function toggleThread(k){ openThread=(openThread===k)?null:k; renderRole(); }
+function threadPanel(mod, labelFn){
+  if(!openThread||!openThread.startsWith(mod+":")) return "";
+  const c=C(); const i=+openThread.split(":")[1];
+  const list=(c.comments[openThread]||[]).map(cm=>`<div class="comment ${cm.role}"><div class="meta">${esc(cm.auteur)} — ${esc(cm.date)}</div>${esc(cm.text)}</div>`).join("")||`<p class="locked">Aucun commentaire sur cette ligne.</p>`;
+  return `<div class="thread"><h3>💬 ${esc(labelFn(i))}</h3>${list}
+    <div class="row"><div class="field" style="flex:3"><textarea id="cm-input" placeholder="Votre commentaire…"></textarea></div>
+    <div class="field" style="flex:0"><button class="btn secondary" onclick="addComment()">Commenter</button></div>
+    <div class="field" style="flex:0"><button class="btn ghost" onclick="toggleThread('${openThread}')">Fermer</button></div></div></div>`;
+}
+function addComment(){
+  const c=C(); const t=document.getElementById("cm-input").value.trim(); if(!t) return;
+  (c.comments[openThread]=c.comments[openThread]||[]).push({role:role==="coach"?"coach":"ent",auteur:role==="coach"?COACH_ID:c.name,date:today(),text:t});
+  renderRole();
+}
+
+// ============ VALIDATION PAR LIGNE (coach) ============
+function vCell(mod,i,canValidate){
+  const c=C(); const row=({budget:c.budget,inds:c.inds,rapport:c.rapport})[mod][i];
+  const btns=canValidate?` <button class="btn sm ok" title="Valider la ligne" onclick="setRowV('${mod}',${i},'Validé')">✓</button>
+  <button class="btn sm rev" title="Demander une révision" onclick="setRowV('${mod}',${i},'À revoir')">⟲</button>`:"";
+  return `<td class="vcell">${vChip(row.v)}${btns}</td>`;
+}
+function setRowV(mod,i,st){ const c=C(); ({budget:c.budget,inds:c.inds,rapport:c.rapport})[mod][i].v=st; renderRole(); }
+
+// ============ MODULES ============
+function modDiagnostic(c, who, phase){
+  const isFin=phase==="fin";
+  const infos=c.infos;
+  const infoCard = isFin?"":`<div class="card"><h2>Informations générales</h2><div class="row">
+    ${[["Nom",infos.nom],["Prénom",infos.prenom],["Entreprise",c.name],["Pays",infos.pays],["Email",infos.email]].map(([l,v])=>
+      `<div class="field"><label>${l}</label><input type="text" value="${esc(v)}" ${who==="sso"?"disabled":""}></div>`).join("")}
+    <div class="field"><label>Niveau d'anglais</label><select ${who==="sso"?"disabled":""}>${["Elementaire","Fonctionnel Limité","Professionnel Complet"].map(x=>`<option ${x===infos.anglais?"selected":""}>${x}</option>`).join("")}</select></div>
+    <div class="field"><label>Niveau de français</label><select ${who==="sso"?"disabled":""}>${["Elementaire","Fonctionnel Limité","Professionnel Complet"].map(x=>`<option ${x===infos.francais?"selected":""}>${x}</option>`).join("")}</select></div>
+  </div></div>`;
+  const doms = DOMAINS.map(d=>{
+    const dq=d.replace(/'/g,"\'");
+    const qs=qFor(c)[d].map((q,i)=>{
+      const sc=c.diag[phase][d][i];
+      const rep=isFin?"":((c.reponses[d]||[])[i]||"");
+      const entIn = who==="ent"
+        ? `<input type="number" min="0" max="10" value="${sc.ent===null?"":sc.ent}" aria-label="Score entreprise — ${esc(d)} Q${i+1}" onchange="setQScore('${phase}','${dq}',${i},'ent',this.value)">`
+        : `<span class="locked">${sc.ent===null?"—":sc.ent} 🔒</span>`;
+      const ssoIn = who==="sso"
+        ? `<input type="number" min="0" max="10" value="${sc.sso===null?"":sc.sso}" aria-label="Score évaluateur — ${esc(d)} Q${i+1}" onchange="setQScore('${phase}','${dq}',${i},'sso',this.value)">`
+        : `<span class="locked">${sc.sso===null?"—":sc.sso} 🔒</span>`;
+      return `<div class="q"><p>${esc(q)}</p>
+        <textarea ${who==="sso"?"disabled":""} placeholder="Réponse courte…">${esc(rep)}</textarea>
+        <div class="row" style="margin-top:4px;align-items:center"><span class="locked">Score entreprise</span>${entIn}<span class="locked">Score évaluateur</span>${ssoIn}</div></div>`;
+    }).join("");
+    const de=domScore(c,d,"ent",phase), dsc=domScore(c,d,"sso",phase);
+    return `<details><summary><span>${esc(d)}</span><span class="locked" style="font-weight:400">Entreprise : ${de===null?"—":de.toFixed(1)} · Évaluateur : ${dsc===null?"—":dsc.toFixed(1)} <span class="auto-tag">auto</span></span></summary>${qs}</details>`;
+  }).join("");
+  const fe=scoreFinal(c,"ent",phase), fs=scoreFinal(c,"sso",phase);
+  let progression="";
+  if(isFin){
+    const rows=DOMAINS.map(d=>{
+      const i0=domScore(c,d,"sso","init"), f0=domScore(c,d,"sso","fin");
+      const delta=(i0!==null&&f0!==null)?f0-i0:null;
+      const chip=delta===null?`<span class="chip grey">—</span>`:delta>0.05?`<span class="chip ok">▲ +${delta.toFixed(1)}</span>`:delta<-0.05?`<span class="chip crit">▼ ${delta.toFixed(1)}</span>`:`<span class="chip grey">=</span>`;
+      return `<tr><td>${esc(d)}</td><td class="num">${i0===null?"—":i0.toFixed(1)}</td><td class="num">${f0===null?"—":f0.toFixed(1)}</td><td>${chip}</td></tr>`;
+    }).join("");
+    const fi=scoreFinal(c,"sso","init"), ff=scoreFinal(c,"sso","fin");
+    progression=`<div class="card"><h2>Progression — diagnostic initial vs évaluation finale <span class="auto-tag">· score évaluateur</span></h2>
+      ${ff===null?`<p class="score-note">Évaluation finale non encore réalisée : complétez les scores ci-dessous pour mesurer la progression du porteur de projet.</p>`:""}
+      <div class="scroll"><table><thead><tr><th>Domaine</th><th class="num">Initial</th><th class="num">Final</th><th>Progression</th></tr></thead>
+      <tbody>${rows}<tr><td><strong>Score final</strong></td><td class="num"><strong>${fi===null?"—":fi.toFixed(1)}</strong></td><td class="num"><strong>${ff===null?"—":ff.toFixed(1)}</strong></td>
+      <td>${fi!==null&&ff!==null&&ff-fi>0.05?`<span class="chip ok">▲ +${(ff-fi).toFixed(1)}</span>`:""}</td></tr>
+      <tr><td>Catégorie</td><td>${fi===null?"—":catChip(fi)}</td><td colspan="2">${ff===null?"—":catChip(ff)}</td></tr></tbody></table></div></div>`;
+  }
+  return progression+infoCard+`<div class="card"><h2>${isFin?"Évaluation finale — structure complète du Diagnostic 360°":"Diagnostic 360° — 11 domaines"}</h2>
+    <p class="score-note">Stade d'accompagnement : <strong>${esc(c.stade)}</strong> (questionnaire adapté au stade — onglet « Questionnaire 360° » de la vue SAEI). Chaque question est notée de 0 à 10 ; le score de chaque domaine est la moyenne automatique (pondération équivalente) de ses questions, et le score final la moyenne des 11 domaines. ${who==="ent"?"Le score évaluateur est attribué par votre chargé(e) d'accompagnement.":"Les réponses et scores de l'entreprise sont en lecture seule."}${isFin?" Cette évaluation reprend l'ensemble des questions en fin d'accompagnement pour mesurer la progression.":""}</p>
+    ${doms}
+    <h3>Score final <span class="auto-tag">· moyenne automatique des 11 domaines</span></h3>
+    <div class="scroll"><table><thead><tr><th></th><th class="num">Score Entreprise</th><th class="num">Score évaluateur</th></tr></thead>
+    <tbody><tr><td><strong>Score final</strong></td><td class="num"><strong>${fe===null?"—":fe.toFixed(1)}</strong></td><td class="num"><strong>${fs===null?"—":fs.toFixed(1)}</strong></td></tr>
+    <tr><td>Catégorie <span class="locked">(≥ 8 Accelerator · ≥ 5 Cruiser · &lt; 5 Drifter)</span></td><td>${fe===null?"—":catChip(fe)}</td><td>${fs===null?"—":catChip(fs)}</td></tr></tbody></table></div></div>`;
+}
+function setQScore(phase,d,i,who,val){
+  const v=String(val).trim();
+  C().diag[phase][d][i][who]=v===""?null:clamp10(+v||0);
+  renderRole();
+}
+
+function modPlan(c, editable){
+  const rows=c.plan.map((p,i)=>{
+    const ks=indActs(c,p.act);
+    const indsCell=ks.length?ks.map(k=>`${k.phare?'<span class="star">★</span> ':""}${esc(k.ind)}`).join("<br>"):`<span class="locked">aucun indicateur</span>`;
+    return `<tr><td>${esc(p.cat)}</td><td>${esc(p.besoin)}</td><td>${esc(p.act)}</td>
+    <td>${indsCell}</td>
+    <td class="num">${p.duree}</td><td>${esc(p.livrable)}</td><td>${esc(p.lim)}</td><td>${cBtn("plan",i)}</td></tr>`;}).join("");
+  const addForm=editable?`
+    <h3>Ajouter une activité clé</h3>
+    <div class="row">
+      <div class="field"><label for="pl-cat">Catégorie</label><select id="pl-cat" onchange="fillBesoins()">${PLAN_CATS.map(x=>`<option>${x}</option>`).join("")}</select></div>
+      <div class="field" style="flex:2"><label for="pl-besoin">Besoin identifié (dépend de la catégorie)</label><select id="pl-besoin">${BESOINS[PLAN_CATS[0]].map(x=>`<option>${x}</option>`).join("")}</select></div>
+      <div class="field" style="flex:2"><label for="pl-act">Activité clé</label><input type="text" id="pl-act"></div>
+      <div class="field"><label for="pl-duree">Durée (sem.)</label><input type="number" id="pl-duree" min="1" value="2" style="width:100%"></div>
+      <div class="field" style="flex:1"><label for="pl-liv">Livrable (expert)</label><input type="text" id="pl-liv"></div>
+      <div class="field"><label for="pl-lim">Date limite (expert)</label><input type="date" id="pl-lim"></div>
+      <div class="field" style="flex:0"><button class="btn" onclick="addPlan()">Ajouter</button></div>
+    </div><p class="locked">Les indicateurs SMART se définissent ensuite dans l'onglet « Indicateurs SMART », rattachés à l'activité clé.</p>`:`<p class="score-note">Construit par votre coach — lecture seule. Commentez une ligne via sa pastille 💬.</p>`;
+  return `<div class="card"><h2>II. Plan de croissance</h2>
+    <p class="score-note">Le plan définit la vision de croissance : chaque besoin identifié se décline en activités clés à mettre en œuvre, mesurées par des indicateurs SMART (★ = indicateur phare, suivi au niveau programme). L'exécution se coche dans le Journal de mentorat ; l'atteinte se lit dans l'onglet « Indicateurs SMART ».</p>
+    <div class="scroll"><table><thead><tr><th>Catégorie</th><th>Besoin identifié</th><th>Activité clé</th><th>Indicateurs SMART (auto)</th><th class="num">Durée (sem.)</th><th>Livrable (expert)</th><th>Date limite</th><th>💬</th></tr></thead>
+    <tbody>${rows}</tbody></table></div>
+    ${threadPanel("plan",i=>"Plan de croissance — "+(c.plan[i]?c.plan[i].act:""))}${addForm}</div>`;
+}
+function fillBesoins(){
+  const cat=document.getElementById("pl-cat").value;
+  document.getElementById("pl-besoin").innerHTML=BESOINS[cat].map(x=>`<option>${x}</option>`).join("");
+}
+function addPlan(){
+  const c=C(); const act=document.getElementById("pl-act").value.trim(); if(!act) return;
+  c.plan.push({cat:document.getElementById("pl-cat").value, besoin:document.getElementById("pl-besoin").value,
+    act, duree:+document.getElementById("pl-duree").value||2,
+    livrable:document.getElementById("pl-liv").value.trim()||"—", lim:document.getElementById("pl-lim").value||"—", done:false});
+  renderRole();
+}
+
+function modFonds(c,{edit,canValidate}){
+  const moisTh=MOIS.map(m=>`<th class="num">${m}</th>`).join("");
+  const rows=c.budget.map((b,i)=>{
+    const cells=b.mois.map((v,mi)=>`<td class="num">${edit?`<input class="mini" type="number" min="0" value="${v||""}" aria-label="${MOIS[mi]}" onchange="C().budget[${i}].mois[${mi}]=+this.value||0;renderRole()">`:(v?eur(v):"")}</td>`).join("");
+    return `<tr><td>${esc(b.act)}</td><td>${esc(b.act==="BOOTCAMP"?"-":actBesoin(c,b.act))}</td>
+      <td>${edit?`<input type="text" value="${esc(b.desc)}" style="min-width:160px" aria-label="Description" onchange="C().budget[${i}].desc=this.value">`:esc(b.desc)}</td>
+      <td>${esc(b.cat)}</td>${cells}<td class="num"><strong>${eur(ligneTotal(b))}</strong></td>
+      ${vCell("budget",i,canValidate)}<td>${cBtn("budget",i)}</td></tr>`;}).join("");
+  const addForm=edit?`
+    <h3>Ajouter une ligne de dépense</h3>
+    <div class="row">
+      <div class="field" style="flex:2"><label for="bd-act">Activité clé</label><select id="bd-act">${actOptions(c).map(x=>`<option>${esc(x)}</option>`).join("")}</select></div>
+      <div class="field" style="flex:2"><label for="bd-desc">Description</label><input type="text" id="bd-desc"></div>
+      <div class="field"><label for="bd-cat">Catégorie</label><select id="bd-cat">${DEPENSE_CATS.map(x=>`<option>${x}</option>`).join("")}</select></div>
+      <div class="field"><label for="bd-m">Montant 1er mois (€)</label><input type="number" id="bd-m" min="0" style="width:100%"></div>
+      <div class="field" style="flex:0"><button class="btn" onclick="addBudget()">Ajouter</button></div>
+    </div><p class="locked">Les montants se planifient ensuite mois par mois directement dans le tableau. Les activités clés proviennent du plan de croissance.</p>`:"";
+  const tot=budgetTot(c);
+  const syn=[...new Set(c.budget.map(b=>b.act))].map(a=>{
+    const b=budgetParAct(c,a);
+    return `<tr><td>${esc(a)}</td><td class="num">${eur(b)}</td><td class="num">${tot?Math.round(100*b/tot):0} %</td><td>${esc(a==="BOOTCAMP"?"-":actBesoin(c,a))}</td></tr>`;}).join("");
+  return `<div class="card"><h2>III. Utilisation des fonds</h2>
+    ${edit?`<p class="score-note">Saisi par l'entreprise : planifiez chaque dépense mois par mois (Départ + Jan–Sep ; Jan–Jun = Phase II de pré-accélération, Jul–Sep = mentorat léger). La synthèse III.1 se génère automatiquement.</p>`
+          :`<p class="score-note">Défini par l'entreprise — lecture seule pour le coach. Validez ou renvoyez chaque ligne, commentez via 💬.</p>`}
+    <h3>Tableau III.2 — Détail par ligne de dépense</h3>
+    <div class="scroll"><table><thead><tr><th>Activité clé</th><th>Besoin identifié</th><th>Description</th><th>Catégorie</th>${moisTh}<th class="num">Total</th><th>Validation</th><th>💬</th></tr></thead>
+    <tbody>${rows}<tr><td colspan="${4+MOIS.length}"><strong>Total général</strong></td><td class="num"><strong>${eur(tot)}</strong></td><td colspan="2" class="locked">Contrôle cohérence III.1 = III.2 : OK (automatique)</td></tr></tbody></table></div>
+    ${threadPanel("budget",i=>"Utilisation des fonds — "+(c.budget[i]?c.budget[i].desc:""))}
+    ${addForm}
+    <h3>Tableau III.1 — Synthèse par activité clé <span class="auto-tag">· générée automatiquement</span></h3>
+    <div class="scroll"><table><thead><tr><th>Activité clé</th><th class="num">Budget (EUR)</th><th class="num">Budget (%)</th><th>Besoin identifié</th></tr></thead>
+    <tbody>${syn}<tr><td><strong>TOT.</strong></td><td class="num"><strong>${eur(tot)}</strong></td><td class="num"><strong>100 %</strong></td><td></td></tr></tbody></table></div></div>`;
+}
+function addBudget(){
+  const c=C(); const d=document.getElementById("bd-desc").value.trim(); if(!d) return;
+  c.budget.push({act:document.getElementById("bd-act").value, desc:d,
+    cat:document.getElementById("bd-cat").value, mois:m9({1:+document.getElementById("bd-m").value||0}), v:"À valider"});
+  renderRole();
+}
+
+function modSynth(c){
+  const rows=c.inds.map((k,i)=>{
+    const execP=besoinPct(c,actBesoin(c,k.act));
+    const attP=indPct(k);
+    const lv=lastVal(k);
+    return `<tr><td class="num">${i+1}</td><td>${k.phare?'<span class="star" title="Indicateur phare">★</span> ':""}${esc(k.ind)}</td>
+      <td>${esc(k.act)}<br><span class="locked">${esc(actBesoin(c,k.act))}</span></td>
+      <td>${pctBar(execP)} <span class="locked">${execP===null?"—":execP+" %"}</span></td>
+      <td class="num">${lv?esc(lv):"—"} / ${esc(k.cible)}<br><span class="locked">cible ${esc(k.ech)}</span></td>
+      <td>${attP===null?(lv?`<span class="chip neutral">En cours</span>`:`<span class="chip grey">Non démarré</span>`):pctChip(attP)}</td></tr>`;
+  }).join("");
+  const besoins=[...new Set(c.plan.map(p=>p.besoin))].map(b=>{
+    const br=besoinRows(c,b); const done=br.filter(p=>p.done).length;
+    const p=besoinPct(c,b);
+    const ki=c.inds.filter(k=>actBesoin(c,k.act)===b).length;
+    return `<tr><td>${esc(b)}</td><td class="num">${done} / ${br.length}</td>
+      <td>${pctBar(p)}</td><td>${pctChip(p)}</td>
+      <td class="num">${ki||`<span class="locked">aucun</span>`}</td></tr>`;
+  }).join("");
+  return `<div class="card"><h2>Synthèse des indicateurs SMART <span class="auto-tag">· statut automatique</span></h2>
+    <p class="score-note">Deux lectures complémentaires : l'<strong>exécution</strong> (activités clés cochées dans le Journal de mentorat, à parts égales au sein d'un besoin) et l'<strong>atteinte</strong> (dernière valeur saisie rapportée à la cible SMART). Un écart entre les deux — tout est coché mais la cible n'est pas atteinte — est un signal pour le coach.</p>
+    <div class="scroll"><table><thead><tr><th class="num">#</th><th>Indicateur SMART</th><th>Activité clé · besoin</th><th>Exécution de l'activité</th><th class="num">Dernière valeur / cible</th><th>Atteinte</th></tr></thead>
+    <tbody>${rows}</tbody></table></div>
+    <h3>Exécution par besoin identifié <span class="auto-tag">· alimentée par le Journal de mentorat</span></h3>
+    <div class="scroll"><table><thead><tr><th>Besoin identifié</th><th class="num">Activités cochées</th><th>Avancement</th><th>Statut</th><th class="num">Indicateurs rattachés</th></tr></thead>
+    <tbody>${besoins}</tbody></table></div></div>`;
+}
+
+function modIndicateurs(c,{canValidate}){
+  const moisTh=MOIS.map(m=>`<th class="num">${m}</th>`).join("");
+  const ir=c.inds.map((k,i)=>{
+    const vals=k.vals.map((v,mi)=>`<td class="num"><input class="minitxt" type="text" value="${esc(v)}" aria-label="${MOIS[mi]}" onchange="C().inds[${i}].vals[${mi}]=this.value;renderRole()"></td>`).join("");
+    return `<tr><td class="num">${i+1}</td>
+      <td>${k.phare?'<span class="star">★</span> ':""}<input type="text" value="${esc(k.ind)}" style="min-width:160px" aria-label="Indicateur" onchange="C().inds[${i}].ind=this.value"></td>
+      <td>${esc(k.act)}</td>
+      <td class="num"><input class="minitxt" type="text" value="${esc(k.cible)}" aria-label="Cible" onchange="C().inds[${i}].cible=this.value;renderRole()"></td>
+      <td><input class="minitxt" type="text" value="${esc(k.ech)}" style="width:76px" aria-label="Échéance" onchange="C().inds[${i}].ech=this.value"></td>
+      <td><select style="width:auto" aria-label="Type" onchange="C().inds[${i}].type=this.value;renderRole()"><option${k.type!=="Impact"?" selected":""}>Performance</option><option${k.type==="Impact"?" selected":""}>Impact</option></select></td>
+      ${vals}${vCell("inds",i,canValidate)}<td>${cBtn("inds",i)}</td></tr>`;}).join("");
+  return `<div class="card"><h2>IV. Indicateurs SMART par activité clé</h2>
+    <p class="score-note">Co-construits par l'entreprise et le coach : un résultat chiffré et daté (Spécifique, Mesurable, Atteignable, Réaliste, Temporel) pour chaque activité clé du plan de croissance. Type « Impact » = résultat de développement (emplois, bénéficiaires…) agrégé dans la vue Partenaire financier. Suivi mensuel : Départ + Jan–Jun (Phase II de pré-accélération) puis Jul–Sep (mentorat léger). ★ = indicateur phare, remonté au niveau programme (3 à 5 max.). Chaque ligne se valide indépendamment.</p>
+    <div class="scroll"><table><thead><tr><th>#</th><th>Indicateur SMART</th><th>Activité clé</th><th class="num">Cible</th><th>Échéance</th><th>Type</th>${moisTh}<th>Validation</th><th>💬</th></tr></thead><tbody>${ir}</tbody></table></div>
+    ${threadPanel("inds",i=>"Indicateur "+(i+1)+" — "+(c.inds[i]?c.inds[i].ind:""))}
+    <div class="row" style="margin-top:10px">
+      <div class="field" style="flex:2"><label for="ic-ind">Nouvel indicateur (résultat chiffré et daté)</label><input type="text" id="ic-ind"></div>
+      <div class="field" style="flex:1"><label for="ic-act">Activité clé</label><select id="ic-act">${c.plan.map(x=>`<option>${esc(x.act)}</option>`).join("")}</select></div>
+      <div class="field"><label for="ic-cible">Cible</label><input type="text" id="ic-cible"></div>
+      <div class="field"><label for="ic-ech">Échéance</label><input type="text" id="ic-ech" placeholder="Juin 2027"></div>
+      <div class="field"><label for="ic-type">Type</label><select id="ic-type"><option>Performance</option><option>Impact</option></select></div>
+      <div class="field" style="flex:0"><label for="ic-phare">Phare ★</label><input type="checkbox" id="ic-phare"></div>
+      <div class="field" style="flex:0"><button class="btn" onclick="addInd()">Ajouter</button></div>
+    </div></div>`;
+}
+function addInd(){
+  const c=C(); const t=document.getElementById("ic-ind").value.trim(); if(!t) return;
+  const phare=document.getElementById("ic-phare").checked;
+  if(phare&&c.inds.filter(k=>k.phare).length>=5){ const el=document.getElementById("ic-ind"); el.value=""; el.placeholder="5 indicateurs phares maximum"; return; }
+  c.inds.push({ind:t, act:document.getElementById("ic-act").value, cible:document.getElementById("ic-cible").value.trim()||"—",
+    ech:document.getElementById("ic-ech").value.trim()||"—", phare, type:document.getElementById("ic-type").value, vals:Array(10).fill(""), v:"À valider"});
+  renderRole();
+}
+
+function modRapport(c,{edit,canValidate}){
+  const rows=c.rapport.map((r,i)=>`<tr><td class="num">${r.n}</td><td>${esc(r.ref)}</td><td>${esc(r.source)}</td>
+    <td>${esc(r.act)}</td><td>${esc(actBesoin(c,r.act))}</td><td>${esc(r.date)}</td><td>${esc(r.fourn)}</td><td>${esc(r.desc)}</td>
+    <td>${esc(r.devise)}</td><td class="num">${r.montant.toLocaleString("fr-FR")}</td><td class="num">${r.taux}</td>
+    <td class="num"><strong>${eur(coutEUR(r))}</strong> <span class="auto-tag">auto</span></td><td>${esc(r.cat)}</td>
+    <td>${esc(r.compte)}</td><td>${esc(r.banque)}</td><td>${esc(r.pays)}</td><td>${esc(r.obs)}</td>
+    ${vCell("rapport",i,canValidate)}<td>${cBtn("rapport",i)}</td></tr>`).join("");
+  const addForm=edit?`
+    <h3>Ajouter une transaction</h3>
+    <div class="row">
+      <div class="field"><label for="rf-source">Source</label><select id="rf-source">${SOURCES.map(x=>`<option>${x}</option>`).join("")}</select></div>
+      <div class="field" style="flex:1"><label for="rf-act">Activité clé</label><select id="rf-act">${actOptions(c).map(x=>`<option>${esc(x)}</option>`).join("")}</select></div>
+      <div class="field"><label for="rf-date">Date facture</label><input type="date" id="rf-date"></div>
+      <div class="field" style="flex:1"><label for="rf-fourn">Fournisseur</label><input type="text" id="rf-fourn"></div>
+      <div class="field" style="flex:1"><label for="rf-desc">Description</label><input type="text" id="rf-desc"></div>
+      <div class="field"><label for="rf-devise">Devise</label><select id="rf-devise">${DEVISES.map(x=>`<option>${x}</option>`).join("")}</select></div>
+      <div class="field"><label for="rf-montant">Montant (devise)</label><input type="number" id="rf-montant" min="0" style="width:100%"></div>
+      <div class="field"><label for="rf-taux">Taux → EUR</label><input type="number" id="rf-taux" min="0" step="0.0001" value="1" style="width:100%"></div>
+      <div class="field"><label for="rf-cat">Catégorie</label><select id="rf-cat">${DEPENSE_CATS.map(x=>`<option>${x}</option>`).join("")}</select></div>
+      <div class="field" style="flex:0"><button class="btn" onclick="addRapport()">Ajouter</button></div>
+    </div><p class="locked">Le coût total en EUR est calculé automatiquement (montant × taux de change).</p>`:`<p class="score-note">Alimenté par l'entreprise — lecture seule pour le coach. Validez ou renvoyez chaque transaction, commentez via 💬.</p>`;
+  return `<div class="card"><h2>VIII. Rapport financier</h2>
+    <div class="scroll"><table><thead><tr><th>N</th><th>N° interne</th><th>Source</th><th>Activité clé</th><th>Besoin identifié</th><th>Date facture</th><th>Fournisseur</th><th>Description</th><th>Devise</th><th class="num">Montant (devise)</th><th class="num">Taux → EUR</th><th class="num">Coût total EUR</th><th>Catégorie</th><th>N° de compte</th><th>Banque</th><th>Pays du compte</th><th>Observations</th><th>Validation</th><th>💬</th></tr></thead>
+    <tbody>${rows}<tr><td colspan="11"><strong>Total dépensé</strong></td><td class="num"><strong>${eur(realiseTot(c))}</strong></td><td colspan="7"></td></tr></tbody></table></div>
+    ${threadPanel("rapport",i=>"Rapport financier — "+(c.rapport[i]?c.rapport[i].ref+" "+c.rapport[i].desc:""))}
+    ${addForm}</div>`;
+}
+function addRapport(){
+  const c=C(); const f=document.getElementById("rf-fourn").value.trim(); if(!f) return;
+  const n=c.rapport.length+1;
+  c.rapport.push({n, ref:c.name.slice(0,3).toUpperCase()+"-"+String(n).padStart(3,"0"),
+    source:document.getElementById("rf-source").value, act:document.getElementById("rf-act").value,
+    date:document.getElementById("rf-date").value||today(), fourn:f, desc:document.getElementById("rf-desc").value.trim()||"—",
+    devise:document.getElementById("rf-devise").value, montant:+document.getElementById("rf-montant").value||0,
+    taux:+document.getElementById("rf-taux").value||1, cat:document.getElementById("rf-cat").value,
+    compte:"—", banque:"—", pays:"—", obs:"", v:"À valider"});
+  renderRole();
+}
+
+function modSuivi(c){
+  const acts=[...new Set([...c.budget.map(b=>b.act),...c.rapport.map(r=>r.act)])];
+  const rows=acts.map(a=>{
+    const b=budgetParAct(c,a), dep=depenseParAct(c,a);
+    const taux=b?Math.round(100*dep/b):0;
+    const chip=taux>100?`<span class="chip crit">dépassement</span>`:taux>=70?`<span class="chip warn">à surveiller</span>`:`<span class="chip ok">ok</span>`;
+    return `<tr><td>${esc(a)}</td><td class="num">${eur(b)}</td><td class="num">${eur(dep)}</td><td class="num">${eur(b-dep)}</td>
+      <td><div class="bar" role="img" aria-label="${taux}%"><i style="width:${Math.min(100,taux)}%"></i></div> <span class="locked">${taux} %</span></td><td>${chip}</td></tr>`;}).join("");
+  const vers=SOURCES.map(s=>{
+    const dep=c.rapport.filter(r=>r.source===s).reduce((a,r)=>a+coutEUR(r),0);
+    return `<tr><td>${s}</td><td class="num">${eur(dep)}</td></tr>`;}).join("");
+  const last=c.sessions.length?c.sessions[c.sessions.length-1]:null;
+  return `<div class="card"><h2>IX. Suivi budgétaire <span class="auto-tag">· automatique — ne rien saisir</span></h2>
+    <p class="score-note">Croisement automatique de l'utilisation des fonds (III) et du rapport financier (VIII).</p>
+    <h3>Par activité clé</h3>
+    <div class="scroll"><table><thead><tr><th>Activité clé</th><th class="num">Budget (EUR)</th><th class="num">Dépensé (EUR)</th><th class="num">Écart (EUR)</th><th>% consommé</th><th></th></tr></thead>
+    <tbody>${rows}<tr><td><strong>TOTAL</strong></td><td class="num"><strong>${eur(budgetTot(c))}</strong></td><td class="num"><strong>${eur(realiseTot(c))}</strong></td>
+    <td class="num"><strong>${eur(budgetTot(c)-realiseTot(c))}</strong></td><td colspan="2"><strong>${budgetTot(c)?Math.round(100*realiseTot(c)/budgetTot(c)):0} %</strong></td></tr></tbody></table></div>
+    <div class="grid2" style="margin-top:16px"><div>
+    <h3>Par versement</h3>
+    <div class="scroll"><table><thead><tr><th>Source</th><th class="num">Dépensé (EUR)</th></tr></thead><tbody>${vers}</tbody></table></div>
+    </div><div>
+    <h3>Mentorat</h3>
+    <div class="scroll"><table><tbody>
+      <tr><td>Heures réalisées (total)</td><td class="num"><strong>${heuresTot(c)}</strong> / ${c.heuresPrevu} h</td></tr>
+      <tr><td>Nombre de sessions</td><td class="num"><strong>${c.sessions.length}</strong></td></tr>
+      <tr><td>Dernier engagement</td><td class="num">${last?engChip(last.eng):"—"}</td></tr>
+    </tbody></table></div></div></div></div>`;
+}
+
+function modTracker(c, edit){
+  const rows=c.sessions.map((s,i)=>{
+    const acts=besoinRows(c,s.besoin);
+    const checks=acts.length?acts.map(p=>{
+      const gi=c.plan.indexOf(p);
+      return `<div class="check-item"><input type="checkbox" id="ck-${i}-${gi}" ${p.done?"checked":""} ${edit?"":"disabled"} onchange="C().plan[${gi}].done=this.checked;renderRole()">
+        <label for="ck-${i}-${gi}" style="margin:0;font-weight:400">${esc(p.act)}</label></div>`;
+    }).join(""):`<span class="locked">Aucune activité clé pour ce besoin</span>`;
+    return `<tr><td>${esc(s.date)}</td><td class="num">${s.duree}</td><td>${esc(s.type)}</td>
+      <td>${esc(s.besoin)}</td><td>${esc(s.act)}</td><td>${esc(s.next)}</td><td>${engChip(s.eng)}</td>
+      <td>${checks}</td><td>${cBtn("tracker",i)}</td></tr>`;}).join("");
+  const addForm=edit?`
+    <h3>Ajouter une session</h3>
+    <div class="row">
+      <div class="field"><label for="tk-date">Date</label><input type="date" id="tk-date"></div>
+      <div class="field"><label for="tk-duree">Durée (h)</label><input type="number" id="tk-duree" min="0.5" step="0.5" value="1" style="width:100%"></div>
+      <div class="field"><label for="tk-type">Type de communication</label><select id="tk-type">${COMM_TYPES.map(x=>`<option>${x}</option>`).join("")}</select></div>
+      <div class="field" style="flex:2"><label for="tk-besoin">Besoin identifié</label><select id="tk-besoin">${[...new Set(c.plan.map(p=>p.besoin))].map(x=>`<option>${esc(x)}</option>`).join("")}</select></div>
+    </div><div class="row" style="margin-top:8px">
+      <div class="field" style="flex:2"><label for="tk-act">Réalisations</label><input type="text" id="tk-act"></div>
+      <div class="field" style="flex:2"><label for="tk-next">Prochaines étapes</label><input type="text" id="tk-next"></div>
+      <div class="field"><label for="tk-eng">Engagement</label><select id="tk-eng">${ENGAGEMENTS.map(x=>`<option>${esc(x)}</option>`).join("")}</select></div>
+      <div class="field" style="flex:0"><button class="btn" onclick="addSession()">Ajouter</button></div>
+    </div><p class="locked">Dans la colonne « Statut », cochez les activités clés réalisées : chaque case cochée augmente automatiquement l'exécution du besoin correspondant — les activités clés d'un même besoin comptent à parts égales. L'atteinte des cibles, elle, se suit via les valeurs mensuelles des indicateurs SMART.</p>`
+    :`<p class="score-note">Complété par le coach — lecture seule pour l'entreprise. Les cases de la colonne « Statut » reflètent l'avancement des activités clés. Commentez une ligne via 💬.</p>`;
+  return `<div class="card"><h2>X. Journal de mentorat</h2>
+    <p class="score-note">Mentor : <strong>${esc(c.coach)}</strong> · ${heuresTot(c)} h réalisées sur ${c.heuresPrevu} h · ${c.sessions.length} sessions</p>
+    <div class="scroll"><table><thead><tr><th>Date</th><th class="num">Durée (heures)</th><th>Type de communication</th><th>Besoin identifié</th><th>Réalisations</th><th>Prochaines étapes</th><th>Engagement</th><th>Statut (activités clés réalisées)</th><th>💬</th></tr></thead>
+    <tbody>${rows}</tbody></table></div>
+    ${threadPanel("tracker",i=>"Session du "+(c.sessions[i]?c.sessions[i].date:""))}${addForm}</div>`;
+}
+function addSession(){
+  const c=C(); const d=document.getElementById("tk-date").value, a=document.getElementById("tk-act").value.trim();
+  if(!d||!a){ const el=document.getElementById("tk-act"); el.placeholder="Date et réalisations obligatoires"; return; }
+  c.sessions.push({date:d, duree:parseFloat(document.getElementById("tk-duree").value)||1,
+    type:document.getElementById("tk-type").value, besoin:document.getElementById("tk-besoin").value,
+    act:a, next:document.getElementById("tk-next").value.trim()||"—",
+    eng:document.getElementById("tk-eng").value});
+  c.sessions.sort((x,y)=>x.date<y.date?-1:1);
+  renderRole();
+}
+
+// ============ ÉDITEUR DU QUESTIONNAIRE 360° (vue SAEI) ============
+let qStade="Incubation";
+function modQuestionnaire(){
+  const stadeSel=STADES.map(st=>`<option${st===qStade?" selected":""}>${st}</option>`).join("");
+  const doms=DOMAINS.map((d,di)=>{
+    const qs=QUESTIONNAIRES[qStade][d].map((q,i)=>`
+      <div class="row" style="margin-bottom:6px;align-items:center">
+        <div class="field" style="flex:6"><input type="text" value="${esc(q)}" aria-label="Question ${i+1}" onchange="editQ('${qStade}','${d}',${i},this.value)"></div>
+        <div class="field" style="flex:0"><button class="btn sm rev" title="Supprimer la question" onclick="delQ('${qStade}','${d}',${i})">✕</button></div>
+      </div>`).join("");
+    return `<details><summary><span>${esc(d)}</span><span class="locked" style="font-weight:400">${QUESTIONNAIRES[qStade][d].length} questions</span></summary>${qs}
+      <div class="row" style="margin-top:6px"><div class="field" style="flex:6"><input type="text" id="addq-${di}" placeholder="Nouvelle question…"></div>
+      <div class="field" style="flex:0"><button class="btn" onclick="addQ('${qStade}','${d}','addq-${di}')">Ajouter</button></div></div></details>`;
+  }).join("");
+  const stades=companies.map((c,i)=>`<tr><td>${esc(c.name)}</td><td>${esc(c.secteur)}</td>
+    <td><select style="width:auto" aria-label="Stade de ${esc(c.name)}" onchange="setStade(${i},this.value)">${STADES.map(st=>`<option${st===c.stade?" selected":""}>${st}</option>`).join("")}</select></td></tr>`).join("");
+  return `<div class="card"><h2>Questionnaire du Diagnostic 360°</h2>
+    <p class="score-note">Adaptez les questions au niveau de maturité des entreprises accompagnées : un questionnaire par stade (Idéation, Incubation, Accélération), modifiable domaine par domaine. Les modifications s'appliquent au diagnostic initial et à l'évaluation finale de toutes les entreprises du stade. Supprimer une question supprime aussi les scores déjà saisis sur cette question.</p>
+    <div class="select-line"><label for="q-stade" style="margin:0">Stade :</label><select id="q-stade" style="width:auto;min-width:180px" onchange="qStade=this.value;renderRole()">${stadeSel}</select></div>
+    ${doms}</div>
+  <div class="card"><h2>Stade d'accompagnement par entreprise</h2>
+    <p class="score-note">Détermine quel questionnaire s'applique à chaque entreprise.</p>
+    <div class="scroll"><table><thead><tr><th>Entreprise</th><th>Secteur</th><th>Stade</th></tr></thead><tbody>${stades}</tbody></table></div></div>`;
+}
+function editQ(st,d,i,v){ QUESTIONNAIRES[st][d][i]=v; }
+function setStade(i,v){
+  const c=companies[i]; c.stade=v;
+  DOMAINS.forEach(d=>{ const n=qFor(c)[d].length; ["init","fin"].forEach(ph=>{
+    const a=c.diag[ph][d]; while(a.length<n) a.push({ent:null,sso:null}); a.length=n; }); });
+  renderRole();
+}
+function delQ(st,d,i){
+  QUESTIONNAIRES[st][d].splice(i,1);
+  companies.filter(c=>c.stade===st).forEach(c=>{ c.diag.init[d].splice(i,1); c.diag.fin[d].splice(i,1); });
+  renderRole();
+}
+function addQ(st,d,inputId){
+  const el=document.getElementById(inputId); const t=el.value.trim(); if(!t) return;
+  QUESTIONNAIRES[st][d].push(t);
+  companies.filter(c=>c.stade===st).forEach(c=>{ c.diag.init[d].push({ent:null,sso:null}); c.diag.fin[d].push({ent:null,sso:null}); });
+  renderRole();
+}
+
+// ============ RENDU ============
+const ENT_TABS=["Diagnostic","Plan de croissance","Utilisation des fonds","Indicateurs SMART","Rapport financier","Journal de mentorat","Tableau de bord","Évaluation finale"];
+const COACH_TABS=["Scores évaluateur","Plan de croissance","Utilisation des fonds","Indicateurs SMART","Rapport financier","Journal de mentorat","Tableau de bord","Questionnaire 360°","Évaluation finale"];
+function renderSubtabs(which,tabs){
+  document.getElementById(which+"-subtabs").innerHTML=tabs.map(t=>
+    `<button class="${subtab[which]===t?"active":""}" onclick="subtab['${which}']='${t}';openThread=null;renderRole()">${t}</button>`).join("");
+}
+function renderRole(){
+  if(role==="saei"){ renderSaei(); return; }
+  const c=C();
+  if(role==="ent"){
+    renderSubtabs("ent",ENT_TABS);
+    const t=subtab.ent; let html="";
+    if(t==="Diagnostic") html=modDiagnostic(c,"ent","init");
+    if(t==="Évaluation finale") html=modDiagnostic(c,"ent","fin");
+    if(t==="Plan de croissance") html=modPlan(c,false);
+    if(t==="Utilisation des fonds") html=modFonds(c,{edit:true,canValidate:false});
+    if(t==="Indicateurs SMART") html=modIndicateurs(c,{canValidate:false});
+    if(t==="Rapport financier") html=modRapport(c,{edit:true,canValidate:false});
+    if(t==="Tableau de bord") html=`<div class="card"><h2>Mon tableau de bord</h2><p class="score-note">Suivi budgétaire et suivi des indicateurs de votre entreprise — généré automatiquement, en lecture seule.</p></div>`+modSynth(c)+modSuivi(c);
+    if(t==="Journal de mentorat") html=modTracker(c,false);
+    document.getElementById("ent-content").innerHTML=html;
+  } else {
+    const sel=document.getElementById("coach-select");
+    if(!sel.options.length){
+      companies.filter(x=>x.coach===COACH_ID).forEach(x=>{const o=document.createElement("option");o.value=x.id;o.textContent=x.name+" — "+x.secteur;sel.appendChild(o);});
+    }
+    renderSubtabs("coach",COACH_TABS);
+    const t=subtab.coach; let html="";
+    if(t==="Scores évaluateur") html=modDiagnostic(c,"sso","init");
+    if(t==="Évaluation finale") html=modDiagnostic(c,"sso","fin");
+    if(t==="Plan de croissance") html=modPlan(c,true);
+    if(t==="Utilisation des fonds") html=modFonds(c,{edit:false,canValidate:true});
+    if(t==="Indicateurs SMART") html=modIndicateurs(c,{canValidate:true});
+    if(t==="Rapport financier") html=modRapport(c,{edit:false,canValidate:true});
+    if(t==="Journal de mentorat") html=modTracker(c,true);
+    if(t==="Tableau de bord") html=dashboardHTML("coach");
+    if(t==="Questionnaire 360°") html=modQuestionnaire();
+    document.getElementById("coach-content").innerHTML=html;
+  }
+}
+function setRole(r){
+  role=r; openThread=null;
+  document.querySelectorAll(".view").forEach(v=>v.classList.remove("visible"));
+  document.getElementById("view-"+r).classList.add("visible");
+  ["ent","coach","saei"].forEach(x=>document.getElementById("rb-"+x).classList.toggle("active",x===r));
+  renderRole();
+}
+
+// ============ TABLEAUX DE BORD (vue SAEI et partenaire financier) ============
+let dashSel={fin:null,coach:null};
+function setDashSel(ctx,v){ dashSel[ctx]=v; if(ctx==="fin"){renderSaei();} else {renderRole();} }
+function dashboardHTML(ctx){
+  const n=companies.length;
+  const heures=companies.reduce((a,c)=>a+heuresTot(c),0);
+  const pend=companies.reduce((a,c)=>a+pendingRows(c),0);
+  const allPhares=companies.flatMap(c=>pharePcts(c));
+  const tiles=[
+    {n:n,l:"entreprises suivies"},
+    {n:heures.toFixed(1).replace(/\.0$/,"")+" h",l:"de mentorat réalisées"},
+    {n:eur(companies.reduce((a,c)=>a+realiseTot(c),0)),l:"dépensés sur "+eur(companies.reduce((a,c)=>a+budgetTot(c),0))+" budgétés"},
+    {n:allPhares.length?Math.round(avg(allPhares))+" %":"—",l:"atteinte moyenne des indicateurs phares ★"},
+    {n:pend,l:"lignes en attente de validation"}
+  ].map(t=>`<div class="tile"><div class="n">${t.n}</div><div class="l">${t.l}</div></div>`).join("");
+
+  const portfolio=`<thead><tr><th>Entreprise</th><th>Chargé(e) d'accomp.</th><th class="num">Score évaluateur</th><th>Catégorie</th><th>Mentorat</th><th>Exécution budget</th><th>Indicateurs phares ★</th><th>Validations</th><th>Dernier engagement</th></tr></thead><tbody>`+
+    companies.map(c=>{
+      const fs=scoreFinal(c,"sso"), h=heuresTot(c);
+      const taux=budgetTot(c)?Math.round(100*realiseTot(c)/budgetTot(c)):0;
+      const pct=Math.round(100*h/c.heuresPrevu);
+      const pending=pendingRows(c);
+      const ph=pharePcts(c);
+      const pm=ph.length?Math.round(avg(ph)):null;
+      const last=c.sessions.length?c.sessions[c.sessions.length-1]:null;
+      return `<tr><td><strong>${esc(c.name)}</strong><br><span class="locked">${esc(c.secteur)}</span></td><td>${esc(c.coach)}</td>
+        <td class="num">${fs.toFixed(1)}</td><td>${catChip(fs)}</td>
+        <td><div class="bar" role="img" aria-label="${pct}%"><i style="width:${Math.min(100,pct)}%"></i></div> <span class="locked">${h} / ${c.heuresPrevu} h</span></td>
+        <td><div class="bar" role="img" aria-label="${taux}%"><i style="width:${Math.min(100,taux)}%"></i></div> <span class="locked">${taux} %</span></td>
+        <td>${pm===null?"—":`<div class="bar" role="img" aria-label="${pm}%"><i style="width:${pm}%"></i></div> <span class="locked">${pm} %</span>`}</td>
+        <td>${pending?`<span class="chip warn">${pending} en attente</span>`:`<span class="chip ok">à jour</span>`}</td>
+        <td>${last?engChip(last.eng):"—"}</td></tr>`;
+    }).join("")+`</tbody>`;
+
+  const W=460,rowH=26,padL=170,padR=36,H=DOMAINS.length*rowH+10;
+  let svg=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Scores moyens par domaine" style="font-family:var(--font-body)">`;
+  DOMAINS.forEach((d,i)=>{
+    const me=avg(companies.map(c=>domScore(c,d,"ent"))), ms=avg(companies.map(c=>domScore(c,d,"sso")));
+    const y=i*rowH+8, sc2=(W-padL-padR)/10;
+    svg+=`<text x="${padL-8}" y="${y+10}" text-anchor="end" font-size="11" fill="var(--muted)">${esc(d.length>22?d.slice(0,21)+"…":d)}</text>`;
+    svg+=`<rect x="${padL}" y="${y}" width="${me*sc2}" height="7" rx="3" fill="var(--accent)"/>`;
+    svg+=`<rect x="${padL}" y="${y+9}" width="${ms*sc2}" height="7" rx="3" fill="var(--warn)"/>`;
+    svg+=`<text x="${padL+Math.max(me,ms)*sc2+5}" y="${y+13}" font-size="10.5" fill="var(--muted)" font-variant-numeric="tabular-nums">${ms.toFixed(1)}</text>`;
+  });
+  svg+=`</svg>`;
+
+  const alerts=[];
+  const now=today();
+  companies.forEach(c=>{
+    c.plan.forEach(p=>{ if(!p.done&&p.lim!=="—"&&p.lim<now) alerts.push(`<li><span class="chip crit">Retard</span> ${esc(c.name)} — activité clé « ${esc(p.act)} » (échéance ${esc(p.lim)})</li>`); });
+    c.budget.forEach(b=>{ if(b.v==="À revoir") alerts.push(`<li><span class="chip crit">À revoir</span> ${esc(c.name)} — ligne budget « ${esc(b.desc)} »</li>`); });
+    c.rapport.forEach(r=>{ if(r.v==="À revoir") alerts.push(`<li><span class="chip crit">À revoir</span> ${esc(c.name)} — transaction ${esc(r.ref)} renvoyée en révision</li>`); });
+    c.inds.filter(k=>k.phare).forEach(k=>{
+      const ex=besoinPct(c,actBesoin(c,k.act)), at=indPct(k);
+      if(ex===100&&at!==null&&at<70) alerts.push(`<li><span class="chip warn">Écart exécution/résultat</span> ${esc(c.name)} — « ${esc(k.ind)} » : activités réalisées mais atteinte à ${at} %</li>`);
+    });
+    const h=heuresTot(c);
+    if(h/c.heuresPrevu<0.4) alerts.push(`<li><span class="chip warn">Mentorat</span> ${esc(c.name)} — seulement ${h} h réalisées sur ${c.heuresPrevu} h prévues</li>`);
+    const last=c.sessions.length?c.sessions[c.sessions.length-1]:null;
+    if(last&&last.eng.startsWith("Pas")) alerts.push(`<li><span class="chip crit">Engagement</span> ${esc(c.name)} — ${esc(last.eng)}</li>`);
+    const gaps=DOMAINS.filter(d=>domScore(c,d,"ent")-domScore(c,d,"sso")>=2);
+    if(gaps.length>=2) alerts.push(`<li><span class="chip warn">Écart de perception</span> ${esc(c.name)} — auto-évaluation nettement supérieure au score évaluateur sur ${gaps.length} domaines</li>`);
+    const taux=budgetTot(c)?100*realiseTot(c)/budgetTot(c):0;
+    if(taux>85) alerts.push(`<li><span class="chip warn">Budget</span> ${esc(c.name)} — ${Math.round(taux)} % du budget consommé</li>`);
+  });
+
+  const sc=companies.find(x=>x.id===dashSel[ctx])||companies[0];
+  const opts=companies.map(x=>`<option value="${x.id}"${x.id===sc.id?" selected":""}>${esc(x.name)} — ${esc(x.secteur)}</option>`).join("");
+  const imp=sc.impact;
+  const impactCard = ctx==="coach"?`<div class="card"><h2>Impact — ${esc(sc.name)} <span class="auto-tag">· saisie SAEI, agrégée dans la vue Partenaire financier</span></h2>
+    <div class="row">
+      <div class="field"><label>Emplois créés</label><input type="number" min="0" value="${imp.emplois}" onchange="setImp('${sc.id}','emplois',this.value)"></div>
+      <div class="field"><label>dont femmes</label><input type="number" min="0" value="${imp.emploisFemmes}" onchange="setImp('${sc.id}','emploisFemmes',this.value)"></div>
+      <div class="field"><label>CA additionnel (€)</label><input type="number" min="0" value="${imp.ca}" style="width:110px" onchange="setImp('${sc.id}','ca',this.value)"></div>
+      <div class="field"><label>Bénéficiaires touchés</label><input type="number" min="0" value="${imp.beneficiaires}" style="width:100px" onchange="setImp('${sc.id}','beneficiaires',this.value)"></div>
+    </div></div>`:"";
+  return `<div class="tiles">${tiles}</div>
+  <div class="card"><h2>Portefeuille d'entreprises</h2><div class="scroll"><table>${portfolio}</table></div></div>
+  <div class="card"><h2>Tableau de bord par entreprise</h2>
+    <p class="score-note">Synthèse des indicateurs SMART et suivi budgétaire de chaque entreprise accompagnée.</p>
+    <div class="select-line" style="margin-bottom:0"><label for="dash-sel-${ctx}" style="margin:0">Entreprise :</label><select id="dash-sel-${ctx}" onchange="setDashSel('${ctx}',this.value)" style="width:auto;min-width:220px">${opts}</select></div>
+  </div>`+impactCard+modSynth(sc)+modSuivi(sc)+`
+  <div class="grid2">
+    <div class="card"><h2>Score moyen par domaine (cohorte)</h2>${svg}
+      <div class="legend"><span class="l-ent">Auto-évaluation</span><span class="l-sso">Score évaluateur</span></div></div>
+    <div class="card"><h2>Points d'attention</h2><ul class="alert-list">${alerts.length?alerts.join(""):"<li>Aucune alerte.</li>"}</ul></div>
+  </div>`;
+}
+function setImp(id,k,v){ companies.find(x=>x.id===id).impact[k]=+v||0; renderRole(); }
+function financeurHTML(){
+  // 1. Impacts créés
+  const emplois=companies.reduce((a,c)=>a+c.impact.emplois,0);
+  const femmes=companies.reduce((a,c)=>a+c.impact.emploisFemmes,0);
+  const ca=companies.reduce((a,c)=>a+c.impact.ca,0);
+  const benef=companies.reduce((a,c)=>a+c.impact.beneficiaires,0);
+  const progCat=companies.filter(c=>{const fi=scoreFinal(c,"sso","init"),ff=scoreFinal(c,"sso","fin");
+    return fi!==null&&ff!==null&&categorie(ff)!==categorie(fi)&&ff>fi;}).length;
+  const dep=companies.reduce((a,c)=>a+realiseTot(c),0), bud=companies.reduce((a,c)=>a+budgetTot(c),0);
+  const tiles=[
+    {n:emplois,l:`emplois créés (dont ${femmes} femmes)`},
+    {n:eur(ca),l:"de chiffre d'affaires additionnel"},
+    {n:benef.toLocaleString("fr-FR"),l:"bénéficiaires touchés"},
+    {n:progCat,l:"entreprises ayant progressé de catégorie"},
+    {n:(bud?Math.round(100*dep/bud):0)+" %",l:eur(dep)+" déployés sur "+eur(bud)+" engagés"}
+  ].map(t=>`<div class="tile"><div class="n">${t.n}</div><div class="l">${t.l}</div></div>`).join("");
+  const impInds=companies.flatMap(c=>c.inds.filter(k=>k.type==="Impact").map(k=>({c,k})));
+  const impRows=impInds.map(({c,k})=>{const p=indPct(k),lv=lastVal(k);
+    return `<tr><td>${esc(c.name)}</td><td>${esc(k.ind)}</td><td class="num">${lv?esc(lv):"—"} / ${esc(k.cible)}</td><td>${pctChip(p)}</td></tr>`;}).join("");
+
+  // 2. Domaines d'activité financés
+  const secteurs=[...new Set(companies.map(c=>c.secteur))].map(sec=>{
+    const d=companies.filter(c=>c.secteur===sec).reduce((a,c)=>a+realiseTot(c),0);
+    return {sec,d};}).sort((a,b)=>b.d-a.d);
+  const maxD=Math.max(...secteurs.map(x=>x.d),1);
+  const secRows=secteurs.map(x=>`<tr><td>${esc(x.sec)}</td><td class="num">${eur(x.d)}</td>
+    <td class="num">${dep?Math.round(100*x.d/dep):0} %</td>
+    <td><div class="bar" role="img" aria-label="${Math.round(100*x.d/maxD)}%"><i style="width:${Math.round(100*x.d/maxD)}%"></i></div></td></tr>`).join("");
+  const capex=companies.flatMap(c=>c.rapport).filter(r=>r.cat==="CAPEX").reduce((a,r)=>a+coutEUR(r),0);
+  const opex=companies.flatMap(c=>c.rapport).filter(r=>r.cat==="OPEX").reduce((a,r)=>a+coutEUR(r),0);
+
+  // 3. Atteinte des indicateurs du programme
+  const allPhares=companies.flatMap(c=>pharePcts(c));
+  const att=allPhares.length?Math.round(avg(allPhares)):0;
+  const phRows=companies.flatMap(c=>c.inds.filter(k=>k.phare).map(k=>{const p=indPct(k),lv=lastVal(k);
+    return `<tr><td>${esc(c.name)}</td><td>${esc(k.ind)}</td><td class="num">${lv?esc(lv):"—"} / ${esc(k.cible)}</td><td>${pctBar(p)}</td><td>${pctChip(p)}</td></tr>`;})).join("");
+
+  // 4. Top 3 au terme de l'évaluation finale
+  const ranked=companies.map(c=>({c,fi:scoreFinal(c,"sso","init"),ff:scoreFinal(c,"sso","fin")}))
+    .filter(x=>x.ff!==null).sort((a,b)=>b.ff-a.ff);
+  const medals=["🥇","🥈","🥉"];
+  const podium=ranked.slice(0,3).map((x,i)=>`<div class="tile" style="text-align:center">
+    <div style="font-size:26px">${medals[i]}</div>
+    <div class="n" style="font-size:18px">${esc(x.c.name)}</div>
+    <div class="l">Score final : <strong>${x.ff.toFixed(1)}/10</strong> · ${x.ff-x.fi>0.05?`<span class="chip ok">▲ +${(x.ff-x.fi).toFixed(1)}</span>`:""}</div>
+    <div style="margin-top:6px">${catChip(x.ff)}</div></div>`).join("");
+  const pending=companies.filter(c=>scoreFinal(c,"sso","fin")===null).map(c=>esc(c.name)).join(", ");
+
+  return `<div class="card"><h2>Impacts créés</h2>
+    <p class="score-note">Agrégation des données d'impact saisies par la SAEI et des indicateurs SMART de type « Impact ».</p>
+    <div class="tiles">${tiles}</div>
+    ${impRows?`<div class="scroll"><table><thead><tr><th>Entreprise</th><th>Indicateur d'impact</th><th class="num">Dernière valeur / cible</th><th>Atteinte</th></tr></thead><tbody>${impRows}</tbody></table></div>`:""}</div>
+  <div class="card"><h2>Domaines d'activité financés</h2>
+    <p class="score-note">Dépenses réelles (rapport financier) par secteur d'activité des entreprises accompagnées.</p>
+    <div class="scroll"><table><thead><tr><th>Secteur</th><th class="num">Dépensé (EUR)</th><th class="num">Part</th><th>Répartition</th></tr></thead><tbody>${secRows}</tbody></table></div>
+    <p class="locked" style="margin-top:8px">Nature des dépenses : ${eur(capex)} d'investissement (CAPEX) · ${eur(opex)} de fonctionnement (OPEX).</p></div>
+  <div class="card"><h2>Atteinte des indicateurs du programme</h2>
+    <div class="row" style="align-items:center;margin-bottom:10px">
+      <div class="tile" style="flex:0;min-width:160px"><div class="n">${att} %</div><div class="l">atteinte moyenne des indicateurs phares ★</div></div>
+      <div class="field"><div class="bar" style="height:14px" role="img" aria-label="${att}%"><i style="width:${att}%"></i></div></div></div>
+    <div class="scroll"><table><thead><tr><th>Entreprise</th><th>Indicateur phare ★</th><th class="num">Dernière valeur / cible</th><th>Avancement</th><th>Atteinte</th></tr></thead><tbody>${phRows}</tbody></table></div></div>
+  <div class="card"><h2>Top 3 des structures accompagnées <span class="auto-tag">· au terme de l'évaluation finale</span></h2>
+    <div class="tiles" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">${podium||"<p class='locked'>Aucune évaluation finale réalisée.</p>"}</div>
+    ${pending?`<p class="locked">Évaluation finale en attente : ${pending}.</p>`:""}</div>`;
+}
+function renderSaei(){ document.getElementById("saei-content").innerHTML=financeurHTML(); }
+
+renderRole();
+</script>
+</body>
+</html>
