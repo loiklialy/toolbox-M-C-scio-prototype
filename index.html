@@ -8,36 +8,34 @@
 <style>
 :root{
   /* Layout: top bar + role switcher, sub-tabs per role, cards; comments anchored per row */
-  --bg:#f4f5f2; --surface:#ffffff; --ink:#1f2823; --muted:#5c6a61; --line:#dde2db;
-  --accent:#1e6f4f; --accent-soft:#e3efe8; --warn:#b26a00; --warn-soft:#fdf2e0;
-  --crit:#b3372f; --crit-soft:#fbe8e6; --ok:#1e6f4f; --ok-soft:#e3efe8;
+  --bg:#FAFAF7; --surface:#FFFFFF; --ink:#2D2C3D; --muted:#5F6472; --line:#D9D5CE;
+  --accent:#D87043; --accent-soft:#F7E8DE; --warn:#A8690F; --warn-soft:#F8EFDC;
+  --crit:#B3372F; --crit-soft:#FBE8E6; --ok:#1E7F4F; --ok-soft:#E4F0E8;
+  --navy:#2D2C3D; --focus:#1F6FEB;
   --font-display:"Archivo","Segoe UI",system-ui,sans-serif;
   --font-body:"Public Sans","Segoe UI",system-ui,sans-serif;
 }
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --bg:#161a17; --surface:#1f2521; --ink:#e8ece8; --muted:#9faba2; --line:#323a34;
-    --accent:#52b388; --accent-soft:#24352c; --warn:#e0a24a; --warn-soft:#38301f;
-    --crit:#e07a70; --crit-soft:#3a2523; --ok:#52b388; --ok-soft:#24352c;
-    color-scheme: dark;
-  }
-}
 :root[data-theme="dark"]{
-  --bg:#161a17; --surface:#1f2521; --ink:#e8ece8; --muted:#9faba2; --line:#323a34;
-  --accent:#52b388; --accent-soft:#24352c; --warn:#e0a24a; --warn-soft:#38301f;
-  --crit:#e07a70; --crit-soft:#3a2523; --ok:#52b388; --ok-soft:#24352c;
+  --bg:#1B1A24; --surface:#232230; --ink:#F2F0EC; --muted:#B7BAC4; --line:#3C3B4A;
+  --accent:#E8865A; --accent-soft:#3A2A22; --warn:#D9A05B; --warn-soft:#332B1C;
+  --crit:#E07A70; --crit-soft:#342020; --ok:#5CBE8F; --ok-soft:#22312A;
+  --navy:#15141D;
   color-scheme: dark;
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
 body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.5}
 .wrap{max-width:1120px;margin:0 auto;padding:0 16px 64px}
-header.top{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--line);margin-bottom:20px}
+header.top{position:sticky;top:0;z-index:10;background:var(--navy);color:#fff;margin-bottom:0}
+.bar{height:3px;background:var(--accent);margin-bottom:20px}
+.brandrow{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.ghost{background:transparent;color:#D7D9E0;border:1px solid #4A4958;border-radius:999px;font-family:var(--font-display);font-size:.72rem;padding:5px 11px;cursor:pointer}
+.ghost:hover{border-color:#D7D9E0}
 .top-inner{max-width:1120px;margin:0 auto;padding:14px 16px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
-.brand{font-family:var(--font-display);font-weight:700;font-size:17px;letter-spacing:-.01em}
-.brand small{display:block;font-family:var(--font-body);font-weight:400;font-size:12px;color:var(--muted)}
+.brand{font-family:var(--font-display);font-weight:700;letter-spacing:.22em;font-size:1.25rem;color:#fff}
+.tagline{font-family:var(--font-display);font-weight:600;font-size:.63rem;letter-spacing:.12em;text-transform:uppercase;color:#E8865A}
 .roles{display:flex;gap:6px;flex-wrap:wrap}
-.roles button{font-family:var(--font-body);font-weight:600;font-size:13px;padding:8px 14px;border-radius:99px;border:1px solid var(--line);background:var(--surface);color:var(--muted);cursor:pointer}
+.roles button{font-family:var(--font-display);font-weight:600;font-size:.72rem;padding:5px 11px;border-radius:999px;border:1px solid #4A4958;background:transparent;color:#D7D9E0;cursor:pointer}
 .roles button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .roles button.active{background:var(--accent);border-color:var(--accent);color:#fff}
 .demo-note{background:var(--warn-soft);color:var(--warn);border:1px solid var(--warn);border-radius:8px;padding:8px 14px;font-size:13px;margin-bottom:20px}
@@ -121,13 +119,15 @@ ul{padding-left:20px;margin:8px 0}
 <body>
 <header class="top">
   <div class="top-inner">
-    <div class="brand">Boîte à outils Mentorat &amp; Coaching<small>Prototype collaboratif — SCIO Network</small></div>
+    <div class="brandrow"><span class="brand">SCIO</span><span class="tagline">Boîte à outils Mentorat &amp; Coaching</span></div>
     <nav class="roles" aria-label="Changer de rôle">
       <button id="rb-ent" class="active" onclick="setRole('ent')">Entreprise</button>
       <button id="rb-coach" onclick="setRole('coach')">Chargé(e) d'accompagnement</button>
       <button id="rb-saei" onclick="setRole('saei')">SAEI — Cohorte</button>
+      <button class="ghost" id="themeBtn" type="button">Sombre</button>
     </nav>
   </div>
+  <div class="bar"></div>
 </header>
 <div class="wrap">
 <div class="demo-note">Maquette de démonstration : données fictives, modifications conservées le temps de la session. Les boutons simulent les accès — en production chaque rôle se connecte avec son compte et ne voit que son périmètre ; la SAEI dispose de deux vues : l'accompagnement entreprise par entreprise (chargé(e) d'accompagnement) et l'analyse globale de la cohorte. Cliquez sur les pastilles 💬 pour ouvrir le fil de commentaires attaché à une ligne précise.</div>
@@ -1069,6 +1069,15 @@ function financeurHTML(){
 }
 function renderSaei(){ document.getElementById("saei-content").innerHTML=financeurHTML(); }
 
+let THEME="light";
+try{const _t=localStorage.getItem("scio.theme");if(_t==="dark"||_t==="light")THEME=_t;else if(window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches)THEME="dark";}catch(e){}
+function applyTheme(){
+  if(THEME==="dark")document.documentElement.setAttribute("data-theme","dark");
+  else document.documentElement.removeAttribute("data-theme");
+  const b=document.getElementById("themeBtn");if(b)b.textContent=THEME==="dark"?"Clair":"Sombre";
+}
+document.getElementById("themeBtn").onclick=function(){THEME=THEME==="dark"?"light":"dark";try{localStorage.setItem("scio.theme",THEME);}catch(e){}applyTheme();};
+applyTheme();
 renderRole();
 </script>
 </body>
