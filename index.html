@@ -124,13 +124,13 @@ ul{padding-left:20px;margin:8px 0}
     <div class="brand">Boîte à outils Mentorat &amp; Coaching<small>Prototype collaboratif — SCIO Network</small></div>
     <nav class="roles" aria-label="Changer de rôle">
       <button id="rb-ent" class="active" onclick="setRole('ent')">Entreprise</button>
-      <button id="rb-coach" onclick="setRole('coach')">SAEI</button>
-      <button id="rb-saei" onclick="setRole('saei')">Partenaire financier</button>
+      <button id="rb-coach" onclick="setRole('coach')">SAEI — Accompagnement</button>
+      <button id="rb-saei" onclick="setRole('saei')">SAEI — Cohorte</button>
     </nav>
   </div>
 </header>
 <div class="wrap">
-<div class="demo-note">Maquette de démonstration : données fictives, modifications conservées le temps de la session. Les trois boutons simulent les trois accès — en production chaque rôle se connecte avec son compte et ne voit que son périmètre. Cliquez sur les pastilles 💬 pour ouvrir le fil de commentaires attaché à une ligne précise.</div>
+<div class="demo-note">Maquette de démonstration : données fictives, modifications conservées le temps de la session. Les boutons simulent les accès — en production chaque rôle se connecte avec son compte et ne voit que son périmètre ; la SAEI dispose de deux vues : l'accompagnement entreprise par entreprise et l'analyse globale de la cohorte. Cliquez sur les pastilles 💬 pour ouvrir le fil de commentaires attaché à une ligne précise.</div>
 
 <section id="view-ent" class="view visible">
   <h1>Espace entreprise — AgriNova</h1>
@@ -140,7 +140,7 @@ ul{padding-left:20px;margin:8px 0}
 </section>
 
 <section id="view-coach" class="view">
-  <h1>Espace SAEI — Mariam K. (chargée d'accompagnement)</h1>
+  <h1>SAEI · Accompagnement — Mariam K. (chargée d'accompagnement)</h1>
   <p class="sub">Vous voyez uniquement les entreprises qui vous sont assignées. Chaque ligne du budget, des indicateurs et du rapport financier se valide indépendamment.</p>
   <div class="select-line">
     <label for="coach-select" style="margin:0">Entreprise :</label>
@@ -151,8 +151,8 @@ ul{padding-left:20px;margin:8px 0}
 </section>
 
 <section id="view-saei" class="view">
-  <h1>Partenaire financier — Cohorte 2026</h1>
-  <p class="sub">Vue en lecture seule, recentrée sur les résultats du programme : impacts, financements, atteinte des indicateurs et classement final.</p>
+  <h1>SAEI · Vue cohorte — Cohorte 2026</h1>
+  <p class="sub">L'œil global de la SAEI sur l'évolution de la cohorte entière : impacts, financements, atteinte des indicateurs et classement final — agrégés automatiquement, en lecture seule.</p>
   <div id="saei-content"></div>
 </section>
 
@@ -653,7 +653,7 @@ function modIndicateurs(c,{canValidate}){
       <td><select style="width:auto" aria-label="Type" onchange="C().inds[${i}].type=this.value;renderRole()"><option${k.type!=="Impact"?" selected":""}>Performance</option><option${k.type==="Impact"?" selected":""}>Impact</option></select></td>
       ${vals}${vCell("inds",i,canValidate)}<td>${cBtn("inds",i)}</td></tr>`;}).join("");
   return `<div class="card"><h2>IV. Indicateurs SMART par activité clé</h2>
-    <p class="score-note">Co-construits par l'entreprise et le coach : un résultat chiffré et daté (Spécifique, Mesurable, Atteignable, Réaliste, Temporel) pour chaque activité clé du plan de croissance. Type « Impact » = résultat de développement (emplois, bénéficiaires…) agrégé dans la vue Partenaire financier. Suivi mensuel : Départ + Jan–Jun (Phase II de pré-accélération) puis Jul–Sep (mentorat léger). ★ = indicateur phare, remonté au niveau programme (3 à 5 max.). Chaque ligne se valide indépendamment.</p>
+    <p class="score-note">Co-construits par l'entreprise et le coach : un résultat chiffré et daté (Spécifique, Mesurable, Atteignable, Réaliste, Temporel) pour chaque activité clé du plan de croissance. Type « Impact » = résultat de développement (emplois, bénéficiaires…) agrégé dans la vue cohorte. Suivi mensuel : Départ + Jan–Jun (Phase II de pré-accélération) puis Jul–Sep (mentorat léger). ★ = indicateur phare, remonté au niveau programme (3 à 5 max.). Chaque ligne se valide indépendamment.</p>
     <div class="scroll"><table><thead><tr><th>#</th><th>Indicateur SMART</th><th>Activité clé</th><th class="num">Cible</th><th>Échéance</th><th>Type</th>${moisTh}<th>Validation</th><th>💬</th></tr></thead><tbody>${ir}</tbody></table></div>
     ${threadPanel("inds",i=>"Indicateur "+(i+1)+" — "+(c.inds[i]?c.inds[i].ind:""))}
     <div class="row" style="margin-top:10px">
@@ -895,7 +895,7 @@ function setRole(r){
   renderRole();
 }
 
-// ============ TABLEAUX DE BORD (vue SAEI et partenaire financier) ============
+// ============ TABLEAUX DE BORD (vues SAEI : accompagnement et cohorte) ============
 let dashSel={fin:null,coach:null};
 function setDashSel(ctx,v){ dashSel[ctx]=v; if(ctx==="fin"){renderSaei();} else {renderRole();} }
 function dashboardHTML(ctx){
@@ -964,7 +964,7 @@ function dashboardHTML(ctx){
   const sc=companies.find(x=>x.id===dashSel[ctx])||companies[0];
   const opts=companies.map(x=>`<option value="${x.id}"${x.id===sc.id?" selected":""}>${esc(x.name)} — ${esc(x.secteur)}</option>`).join("");
   const imp=sc.impact;
-  const impactCard = ctx==="coach"?`<div class="card"><h2>Impact — ${esc(sc.name)} <span class="auto-tag">· saisie SAEI, agrégée dans la vue Partenaire financier</span></h2>
+  const impactCard = ctx==="coach"?`<div class="card"><h2>Impact — ${esc(sc.name)} <span class="auto-tag">· saisie SAEI, agrégée dans la vue cohorte</span></h2>
     <div class="row">
       <div class="field"><label>Emplois créés</label><input type="number" min="0" value="${imp.emplois}" onchange="setImp('${sc.id}','emplois',this.value)"></div>
       <div class="field"><label>dont femmes</label><input type="number" min="0" value="${imp.emploisFemmes}" onchange="setImp('${sc.id}','emploisFemmes',this.value)"></div>
