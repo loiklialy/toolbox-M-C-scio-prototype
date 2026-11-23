@@ -124,13 +124,13 @@ ul{padding-left:20px;margin:8px 0}
     <div class="brand">Boîte à outils Mentorat &amp; Coaching<small>Prototype collaboratif — SCIO Network</small></div>
     <nav class="roles" aria-label="Changer de rôle">
       <button id="rb-ent" class="active" onclick="setRole('ent')">Entreprise</button>
-      <button id="rb-coach" onclick="setRole('coach')">SAEI — Accompagnement</button>
+      <button id="rb-coach" onclick="setRole('coach')">Chargé(e) d'accompagnement</button>
       <button id="rb-saei" onclick="setRole('saei')">SAEI — Cohorte</button>
     </nav>
   </div>
 </header>
 <div class="wrap">
-<div class="demo-note">Maquette de démonstration : données fictives, modifications conservées le temps de la session. Les boutons simulent les accès — en production chaque rôle se connecte avec son compte et ne voit que son périmètre ; la SAEI dispose de deux vues : l'accompagnement entreprise par entreprise et l'analyse globale de la cohorte. Cliquez sur les pastilles 💬 pour ouvrir le fil de commentaires attaché à une ligne précise.</div>
+<div class="demo-note">Maquette de démonstration : données fictives, modifications conservées le temps de la session. Les boutons simulent les accès — en production chaque rôle se connecte avec son compte et ne voit que son périmètre ; la SAEI dispose de deux vues : l'accompagnement entreprise par entreprise (chargé(e) d'accompagnement) et l'analyse globale de la cohorte. Cliquez sur les pastilles 💬 pour ouvrir le fil de commentaires attaché à une ligne précise.</div>
 
 <section id="view-ent" class="view visible">
   <h1>Espace entreprise — AgriNova</h1>
@@ -140,7 +140,7 @@ ul{padding-left:20px;margin:8px 0}
 </section>
 
 <section id="view-coach" class="view">
-  <h1>SAEI · Accompagnement — Mariam K. (chargée d'accompagnement)</h1>
+  <h1>Espace chargé(e) d'accompagnement — Mariam K.</h1>
   <p class="sub">Vous voyez uniquement les entreprises qui vous sont assignées. Chaque ligne du budget, des indicateurs et du rapport financier se valide indépendamment.</p>
   <div class="select-line">
     <label for="coach-select" style="margin:0">Entreprise :</label>
@@ -696,7 +696,7 @@ function modRapport(c,{edit,canValidate}){
       <div class="field"><label for="rf-taux">Taux → EUR</label><input type="number" id="rf-taux" min="0" step="0.0001" value="1" style="width:100%"></div>
       <div class="field"><label for="rf-cat">Catégorie</label><select id="rf-cat">${DEPENSE_CATS.map(x=>`<option>${x}</option>`).join("")}</select></div>
       <div class="field" style="flex:0"><button class="btn" onclick="addRapport()">Ajouter</button></div>
-    </div><p class="locked">Le coût total en EUR est calculé automatiquement (montant × taux de change). Joignez à chaque ligne son justificatif (facture, reçu — PDF ou image, 50 Mo max) via 📎 : il est attendu pour la validation.</p>`:`<p class="score-note">Alimenté par l'entreprise — lecture seule pour le coach. Consultez le justificatif joint, puis validez ou renvoyez chaque transaction ; commentez via 💬.</p>`;
+    </div><p class="locked">Le coût total en EUR est calculé automatiquement (montant × taux de change). Joignez à chaque ligne son justificatif (facture, reçu — PDF ou image, 50 Mo max) via 📎 : il est attendu pour la validation. Cliquez sur un document joint pour le visualiser.</p>`:`<p class="score-note">Alimenté par l'entreprise — lecture seule pour le coach. Cliquez sur le justificatif joint pour le visualiser, puis validez ou renvoyez chaque transaction ; commentez via 💬.</p>`;
   return `<div class="card"><h2>VIII. Rapport financier</h2>
     <div class="scroll"><table><thead><tr><th>N</th><th>N° interne</th><th>Source</th><th>Activité clé</th><th>Besoin identifié</th><th>Date facture</th><th>Fournisseur</th><th>Description</th><th>Devise</th><th class="num">Montant (devise)</th><th class="num">Taux → EUR</th><th class="num">Coût total EUR</th><th>Catégorie</th><th>N° de compte</th><th>Banque</th><th>Pays du compte</th><th>Observations</th><th>Justificatif(s)</th><th>Validation</th><th>💬</th></tr></thead>
     <tbody>${rows}<tr><td colspan="11"><strong>Total dépensé</strong></td><td class="num"><strong>${eur(realiseTot(c))}</strong></td><td colspan="8"></td></tr></tbody></table></div>
@@ -716,8 +716,9 @@ function addRapport(){
   renderRole();
 }
 
+function jName(e){ return typeof e==="string"?e:e.name; }
 function justifCell(r,i,edit){
-  const files=(r.justifs||[]).map((f,j)=>`<span class="chip neutral" title="Démo : le fichier n'est pas réellement stocké dans le prototype">📎 ${esc(f)}${edit?` <a href="#" onclick="rmJustif(${i},${j});return false" title="Retirer" style="text-decoration:none">✕</a>`:""}</span>`).join(" ");
+  const files=(r.justifs||[]).map((f,j)=>`<span class="chip neutral"><a href="#" onclick="openJustif(${i},${j});return false" title="Cliquer pour visualiser le document" style="color:inherit;text-decoration:none">📎 ${esc(jName(f))}</a>${edit?` <a href="#" onclick="rmJustif(${i},${j});return false" title="Retirer" style="text-decoration:none">✕</a>`:""}</span>`).join(" ");
   const btn=edit?` <button class="btn ghost" style="font-size:11.5px;padding:2px 9px" onclick="uploadJustif(${i})">📎 Joindre</button>`:"";
   return (files||(edit?"":`<span class="chip grey">—</span>`))+btn;
 }
@@ -726,10 +727,27 @@ function uploadJustif(i){ _justifTarget=i; const inp=document.getElementById("ju
 function justifPicked(inp){
   if(_justifTarget===null||!inp.files.length) return;
   const r=C().rapport[_justifTarget];
-  r.justifs=(r.justifs||[]).concat([...inp.files].map(f=>f.name));
+  r.justifs=(r.justifs||[]).concat([...inp.files].map(f=>({name:f.name, url:URL.createObjectURL(f)})));
   _justifTarget=null; renderRole();
 }
-function rmJustif(i,j){ const r=C().rapport[i]; (r.justifs||[]).splice(j,1); renderRole(); }
+function rmJustif(i,j){ const r=C().rapport[i]; const e=(r.justifs||[])[j]; if(e&&typeof e==="object"&&e.url) URL.revokeObjectURL(e.url); (r.justifs||[]).splice(j,1); renderRole(); }
+function openJustif(i,j){
+  const c=C(), r=c.rapport[i], e=(r.justifs||[])[j]; if(!e) return;
+  if(typeof e==="object"&&e.url){ window.open(e.url,"_blank"); return; }
+  // Justificatif de démonstration : on génère une facture fictive
+  const html=`<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>${esc(jName(e))}</title>
+    <style>body{font-family:Georgia,serif;max-width:640px;margin:40px auto;padding:0 24px;color:#1c2430}
+    .tag{display:inline-block;background:#fff3cd;border:1px solid #e0c36a;border-radius:6px;padding:4px 10px;font-size:13px;margin-bottom:24px}
+    h1{font-size:20px;border-bottom:2px solid #0B1D3A;padding-bottom:8px}table{width:100%;border-collapse:collapse;margin-top:16px}
+    td,th{border:1px solid #cdd5e0;padding:8px 10px;text-align:left;font-size:14px}</style></head><body>
+    <div class="tag">Document de démonstration — généré par le prototype, sans valeur comptable</div>
+    <h1>${esc(jName(e))}</h1>
+    <p><b>Entreprise :</b> ${esc(c.name)}<br><b>Fournisseur :</b> ${esc(r.fourn)}<br><b>Date :</b> ${esc(r.date)}</p>
+    <table><tr><th>Description</th><th>Montant</th></tr>
+    <tr><td>${esc(r.desc)}</td><td>${r.montant.toLocaleString("fr-FR")} ${esc(r.devise)}</td></tr></table>
+    <p style="margin-top:24px;font-size:13px;color:#555">En production, ce lien ouvre le fichier réellement téléversé (PDF ou image) dans la visionneuse.</p></body></html>`;
+  window.open(URL.createObjectURL(new Blob([html],{type:"text/html"})),"_blank");
+}
 
 function modSuivi(c){
   const acts=[...new Set([...c.budget.map(b=>b.act),...c.rapport.map(r=>r.act)])];
