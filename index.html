@@ -286,7 +286,7 @@ const companies = [
      {act:"Force de vente terrain", desc:"Agent commercial terrain (6 mois)", cat:"OPEX", mois:m9({1:850,2:850,3:850,4:850,5:850,6:850}), v:"À valider"},
      {act:"Campagne radio locale", desc:"Campagne radio locale + flyers", cat:"OPEX", mois:m9({3:900,4:600}), v:"À revoir"}],
    rapport:[
-     {n:1, ref:"AGN-001", source:"Premier Versement", act:"Unités de démonstration en région", date:"2026-10-12", fourn:"AgroTech Distrib", desc:"Acompte motoculteur n°1", devise:"CFA", montant:1180000, taux:0.00152, cat:"CAPEX", compte:"CI93-…-4417", banque:"Banque Atlantique", pays:"Côte d'Ivoire", obs:"", v:"Validé"},
+     {n:1, ref:"AGN-001", source:"Premier Versement", act:"Unités de démonstration en région", date:"2026-10-12", fourn:"AgroTech Distrib", desc:"Acompte motoculteur n°1", devise:"CFA", montant:1180000, taux:0.00152, cat:"CAPEX", compte:"CI93-…-4417", banque:"Banque Atlantique", pays:"Côte d'Ivoire", obs:"", justifs:["facture_agrotech_0231.pdf"], v:"Validé"},
      {n:2, ref:"AGN-002", source:"Premier Versement", act:"Unités de démonstration en région", date:"2026-10-25", fourn:"Semences du Nord", desc:"Lot d'intrants certifiés", devise:"CFA", montant:625000, taux:0.00152, cat:"Fonds de roulement", compte:"CI93-…-4417", banque:"Banque Atlantique", pays:"Côte d'Ivoire", obs:"Facture à joindre", v:"À revoir"},
      {n:3, ref:"AGN-003", source:"Premier Versement", act:"Tableau de bord financier mensuel", date:"2026-11-05", fourn:"Cabinet Comptex", desc:"Honoraires comptables octobre", devise:"EUR", montant:350, taux:1, cat:"OPEX", compte:"CI93-…-4417", banque:"Banque Atlantique", pays:"Côte d'Ivoire", obs:"", v:"À valider"}],
    sessions:[
@@ -316,7 +316,7 @@ const companies = [
      {act:"Audit de conformité données de santé", desc:"Audit de conformité données de santé", cat:"OPEX", mois:m9({1:1500,3:2000}), v:"Validé"},
      {act:"Développement application mobile", desc:"Développeur mobile (4 mois)", cat:"OPEX", mois:m9({1:1500,2:1500,3:1500,4:1500}), v:"Validé"}],
    rapport:[
-     {n:1, ref:"KEL-001", source:"Premier Versement", act:"Audit de conformité données de santé", date:"2026-10-20", fourn:"Cabinet LexSanté", desc:"Acompte audit conformité", devise:"DZD", montant:180000, taux:0.0067, cat:"OPEX", compte:"DZ58-…-2201", banque:"BNA", pays:"Algérie", obs:"", v:"Validé"},
+     {n:1, ref:"KEL-001", source:"Premier Versement", act:"Audit de conformité données de santé", date:"2026-10-20", fourn:"Cabinet LexSanté", desc:"Acompte audit conformité", devise:"DZD", montant:180000, taux:0.0067, cat:"OPEX", compte:"DZ58-…-2201", banque:"BNA", pays:"Algérie", obs:"", justifs:["recu_lexsante_acompte.pdf"], v:"Validé"},
      {n:2, ref:"KEL-002", source:"Premier Versement", act:"Développement application mobile", date:"2026-11-08", fourn:"Dev Freelance B.T.", desc:"Sprint 1 application", devise:"EUR", montant:1500, taux:1, cat:"OPEX", compte:"DZ58-…-2201", banque:"BNA", pays:"Algérie", obs:"", v:"À valider"}],
    sessions:[
      {date:"2026-10-13", duree:2, type:"Appel vidéo", besoin:"Absence de stratégie de pénétration", act:"Diagnostic approfondi, cartographie des prescripteurs", next:"Lister 20 prescripteurs prioritaires", eng:"Engagé"},
@@ -358,7 +358,7 @@ const companies = [
      {act:"Force de vente terrain", desc:"Commerciaux terrain (x2, 6 mois)", cat:"OPEX", mois:m9({1:1070,2:1070,3:1070,4:1070,5:1070,6:1050}), v:"Validé"},
      {act:"Supports de démonstration", desc:"Supports de vente et démonstration", cat:"OPEX", mois:m9({1:900}), v:"Validé"}],
    rapport:[
-     {n:1, ref:"SOL-001", source:"Premier Versement", act:"Constitution du stock de kits", date:"2026-10-15", fourn:"SunParts Ltd", desc:"Acompte commande 100 kits", devise:"USD", montant:3000, taux:0.93, cat:"Fonds de roulement", compte:"SN12-…-5540", banque:"CBAO", pays:"Sénégal", obs:"", v:"Validé"},
+     {n:1, ref:"SOL-001", source:"Premier Versement", act:"Constitution du stock de kits", date:"2026-10-15", fourn:"SunParts Ltd", desc:"Acompte commande 100 kits", devise:"USD", montant:3000, taux:0.93, cat:"Fonds de roulement", compte:"SN12-…-5540", banque:"CBAO", pays:"Sénégal", obs:"", justifs:["facture_sunparts_kits.pdf"], v:"Validé"},
      {n:2, ref:"SOL-002", source:"Premier Versement", act:"Supports de démonstration", date:"2026-11-10", fourn:"Imprimerie Carrefour", desc:"Brochures de démonstration", devise:"CFA", montant:157000, taux:0.00152, cat:"OPEX", compte:"SN12-…-5540", banque:"CBAO", pays:"Sénégal", obs:"", v:"Validé"}],
    sessions:[
      {date:"2026-10-08", duree:2, type:"Appel vidéo", besoin:"Dépendance à un partenaire/fournisseur clé", act:"Revue fournisseurs, grille de qualification", next:"Obtenir 2 devis alternatifs", eng:"Engagé"},
@@ -681,6 +681,7 @@ function modRapport(c,{edit,canValidate}){
     <td>${esc(r.devise)}</td><td class="num">${r.montant.toLocaleString("fr-FR")}</td><td class="num">${r.taux}</td>
     <td class="num"><strong>${eur(coutEUR(r))}</strong> <span class="auto-tag">auto</span></td><td>${esc(r.cat)}</td>
     <td>${esc(r.compte)}</td><td>${esc(r.banque)}</td><td>${esc(r.pays)}</td><td>${esc(r.obs)}</td>
+    <td>${justifCell(r,i,edit)}</td>
     ${vCell("rapport",i,canValidate)}<td>${cBtn("rapport",i)}</td></tr>`).join("");
   const addForm=edit?`
     <h3>Ajouter une transaction</h3>
@@ -695,10 +696,11 @@ function modRapport(c,{edit,canValidate}){
       <div class="field"><label for="rf-taux">Taux → EUR</label><input type="number" id="rf-taux" min="0" step="0.0001" value="1" style="width:100%"></div>
       <div class="field"><label for="rf-cat">Catégorie</label><select id="rf-cat">${DEPENSE_CATS.map(x=>`<option>${x}</option>`).join("")}</select></div>
       <div class="field" style="flex:0"><button class="btn" onclick="addRapport()">Ajouter</button></div>
-    </div><p class="locked">Le coût total en EUR est calculé automatiquement (montant × taux de change).</p>`:`<p class="score-note">Alimenté par l'entreprise — lecture seule pour le coach. Validez ou renvoyez chaque transaction, commentez via 💬.</p>`;
+    </div><p class="locked">Le coût total en EUR est calculé automatiquement (montant × taux de change). Joignez à chaque ligne son justificatif (facture, reçu — PDF ou image, 50 Mo max) via 📎 : il est attendu pour la validation.</p>`:`<p class="score-note">Alimenté par l'entreprise — lecture seule pour le coach. Consultez le justificatif joint, puis validez ou renvoyez chaque transaction ; commentez via 💬.</p>`;
   return `<div class="card"><h2>VIII. Rapport financier</h2>
-    <div class="scroll"><table><thead><tr><th>N</th><th>N° interne</th><th>Source</th><th>Activité clé</th><th>Besoin identifié</th><th>Date facture</th><th>Fournisseur</th><th>Description</th><th>Devise</th><th class="num">Montant (devise)</th><th class="num">Taux → EUR</th><th class="num">Coût total EUR</th><th>Catégorie</th><th>N° de compte</th><th>Banque</th><th>Pays du compte</th><th>Observations</th><th>Validation</th><th>💬</th></tr></thead>
-    <tbody>${rows}<tr><td colspan="11"><strong>Total dépensé</strong></td><td class="num"><strong>${eur(realiseTot(c))}</strong></td><td colspan="7"></td></tr></tbody></table></div>
+    <div class="scroll"><table><thead><tr><th>N</th><th>N° interne</th><th>Source</th><th>Activité clé</th><th>Besoin identifié</th><th>Date facture</th><th>Fournisseur</th><th>Description</th><th>Devise</th><th class="num">Montant (devise)</th><th class="num">Taux → EUR</th><th class="num">Coût total EUR</th><th>Catégorie</th><th>N° de compte</th><th>Banque</th><th>Pays du compte</th><th>Observations</th><th>Justificatif(s)</th><th>Validation</th><th>💬</th></tr></thead>
+    <tbody>${rows}<tr><td colspan="11"><strong>Total dépensé</strong></td><td class="num"><strong>${eur(realiseTot(c))}</strong></td><td colspan="8"></td></tr></tbody></table></div>
+    <input type="file" id="justif-input" multiple accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="justifPicked(this)">
     ${threadPanel("rapport",i=>"Rapport financier — "+(c.rapport[i]?c.rapport[i].ref+" "+c.rapport[i].desc:""))}
     ${addForm}</div>`;
 }
@@ -710,9 +712,24 @@ function addRapport(){
     date:document.getElementById("rf-date").value||today(), fourn:f, desc:document.getElementById("rf-desc").value.trim()||"—",
     devise:document.getElementById("rf-devise").value, montant:+document.getElementById("rf-montant").value||0,
     taux:+document.getElementById("rf-taux").value||1, cat:document.getElementById("rf-cat").value,
-    compte:"—", banque:"—", pays:"—", obs:"", v:"À valider"});
+    compte:"—", banque:"—", pays:"—", obs:"", justifs:[], v:"À valider"});
   renderRole();
 }
+
+function justifCell(r,i,edit){
+  const files=(r.justifs||[]).map((f,j)=>`<span class="chip neutral" title="Démo : le fichier n'est pas réellement stocké dans le prototype">📎 ${esc(f)}${edit?` <a href="#" onclick="rmJustif(${i},${j});return false" title="Retirer" style="text-decoration:none">✕</a>`:""}</span>`).join(" ");
+  const btn=edit?` <button class="btn ghost" style="font-size:11.5px;padding:2px 9px" onclick="uploadJustif(${i})">📎 Joindre</button>`:"";
+  return (files||(edit?"":`<span class="chip grey">—</span>`))+btn;
+}
+let _justifTarget=null;
+function uploadJustif(i){ _justifTarget=i; const inp=document.getElementById("justif-input"); inp.value=""; inp.click(); }
+function justifPicked(inp){
+  if(_justifTarget===null||!inp.files.length) return;
+  const r=C().rapport[_justifTarget];
+  r.justifs=(r.justifs||[]).concat([...inp.files].map(f=>f.name));
+  _justifTarget=null; renderRole();
+}
+function rmJustif(i,j){ const r=C().rapport[i]; (r.justifs||[]).splice(j,1); renderRole(); }
 
 function modSuivi(c){
   const acts=[...new Set([...c.budget.map(b=>b.act),...c.rapport.map(r=>r.act)])];
